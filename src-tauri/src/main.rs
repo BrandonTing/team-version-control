@@ -2,9 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
-use specta::collect_types;
 use specta::Type;
-use tauri_specta::ts;
 
 #[derive(Deserialize, Type)]
 pub struct GreetArg {
@@ -24,13 +22,19 @@ fn greet(arg: GreetArg) -> GreetReturn {
     }
 }
 fn main() {
-    ts::export(collect_types![greet], "../src/bindings.ts").unwrap();
+    let _ = fix_path_env::fix(); // <---- Add this
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet])
+        .plugin(tauri_plugin_store::Builder::default().build())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+use specta::collect_types;
+#[cfg(test)]
+use tauri_specta::ts;
 
 #[test]
 fn export_bindings() {
