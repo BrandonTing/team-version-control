@@ -2,10 +2,10 @@
 	import github from '$lib/images/github.svg';
 </script>
 
-<header class="flex justify-end">
+<footer class="flex justify-end p-4">
 	<div class="size-12">
 		<a href="https://github.com/BrandonTing/team-version-control">
 			<img src={github} alt="GitHub" />
 		</a>
 	</div>
-</header>
+</footer>
