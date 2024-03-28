@@ -38,6 +38,9 @@
   },
   "type": "module",
   "dependencies": {
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.2",
+    "tailwind-variants": "^0.2.1",
     "tauri-plugin-store-api": "https://github.com/tauri-apps/tauri-plugin-store"
   }
 }
