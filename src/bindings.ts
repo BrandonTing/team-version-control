@@ -10,10 +10,22 @@ declare global {
 // Function avoids 'window not defined' in SSR
 const invoke = () => window.__TAURI_INVOKE__;
 
-export function getTeam() {
-    return invoke()<Team[]>("get_team")
+export function getTeams() {
+    return invoke()<Team[]>("get_teams")
 }
 
-export type Branch = { id: string; title: string; history: Change[]; current_change: string }
+export function createTeam(title: string, description: string) {
+    return invoke()<Team>("create_team", { title,description })
+}
+
+export function createBranch(teamTitle: string, title: string, description: string) {
+    return invoke()<Branch>("create_branch", { teamTitle,title,description })
+}
+
+export function createChange(teamTitle: string, branchTitle: string, message: string, context: string) {
+    return invoke()<Change>("create_change", { teamTitle,branchTitle,message,context })
+}
+
+export type Branch = { title: string; description: string; history: Change[]; current_change_id: string }
 export type Change = { id: string; message: string; context: string }
-export type Team = { title: string; description: string; branches: Branch[]; current_branch: string }
+export type Team = { title: string; description: string; branches: Branch[]; current_branch_title: string }

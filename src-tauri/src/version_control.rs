@@ -47,10 +47,7 @@ pub fn get_teams(app_handle: tauri::AppHandle) -> Result<Vec<Team>, String> {
     let store = get_store(app_handle);
     match serde_json::from_value::<Vec<Team>>(store.values().map(|x| x.clone()).collect()) {
         Ok(v) => Ok(v),
-        Err(e) => {
-            println!("{:?}", e);
-            Err("Failed to fetch teams".to_string())
-        }
+        Err(_) => Err("Failed to fetch teams".to_string()),
     }
 }
 
