@@ -1,15 +1,19 @@
 <script lang="ts">
-	import CardContent from '$lib/components/ui/card/card-content.svelte';
 	import CardTitle from '$lib/components/ui/card/card-title.svelte';
 	import Card from '$lib/components/ui/card/card.svelte';
-	import type { Team } from '../bindings';
+	import type { Team } from '@/bindings';
+	import CardDescription from '@/components/ui/card/card-description.svelte';
 
-	export let team: Team;
+	let {
+		team
+	}: {
+		team: Team;
+	} = $props();
 </script>
 
-<Card>
+<Card class="px-4 py-2">
 	<CardTitle>{team.title}</CardTitle>
-	<CardContent>
+	<CardDescription>
 		{team.description}
-	</CardContent>
+	</CardDescription>
 </Card>

@@ -61,7 +61,7 @@ pub fn create_team(
     let mut store = get_store(app_handle);
     match store.get(&title) {
         Some(_) => {
-            return Err("Please provide unique title for teams.".to_string());
+            return Err("The title has been used.".to_string());
         }
         _ => {
             println!("No conflict.")
