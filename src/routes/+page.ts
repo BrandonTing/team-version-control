@@ -7,8 +7,7 @@ export const prerender = true;
  
 export async function load() {
 	try {
-		const teams = await getTeams();
-		return {teams}
+		return {teamsRequest: getTeams()}
 	} catch (e) {
 		error(500, {
 			message: "Failed to get teams"

@@ -5,7 +5,7 @@
 	import type { PageData } from './$types';
 	import Team from './team.svelte';
 	export let data: PageData;
-	const { teams } = data;
+	const { teamsRequest } = data;
 </script>
 
 <section class="w-full">
@@ -19,16 +19,19 @@
 			on:mouseenter={async () => await preloadData('/create')}>New</Button
 		>
 	</div>
-	{#if teams.length === 0}
-		<Root>
-			<Title>Heads up!</Title>
-			<Description>You can add team by click the New button.</Description>
-		</Root>
-	{/if}
-
-	<div class="grid grid-cols-4 gap-4 py-2">
-		{#each teams as team}
-			<Team {team} />
-		{/each}
-	</div>
+	{#await teamsRequest}
+		<p>loading...</p>
+	{:then teams}
+		{#if teams.length === 0}
+			<Root>
+				<Title>Heads up!</Title>
+				<Description>You can add team by click the New button.</Description>
+			</Root>
+		{/if}
+		<div class="grid grid-cols-4 gap-4 py-2">
+			{#each teams as team}
+				<Team {team} />
+			{/each}
+		</div>
+	{/await}
 </section>
