@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_value, json};
 use specta::Type;
@@ -10,18 +11,25 @@ use crate::store::get_store;
 pub struct Team {
     pub title: String,
     pub description: String,
-    // pub created_at: time::SystemTime,
+    #[specta(type = u32)]
+    pub created_at: i64,
     pub branches: Vec<Branch>,
     pub current_branch_title: String,
 }
 
 impl Team {
-    fn new(title: String, description: String) -> Self {
+    fn new(title: String, description: String, main_branch_title: String) -> Self {
         Team {
             title: title.to_string(),
             description: description.to_string(),
-            branches: vec![],
-            current_branch_title: "".to_string(),
+            created_at: Utc::now().timestamp(),
+            branches: vec![Branch {
+                title: main_branch_title.clone(),
+                description: "".to_string(),
+                history: vec![],
+                current_change_id: "".to_string(),
+            }],
+            current_branch_title: main_branch_title.to_string(),
         }
     }
 }
@@ -57,6 +65,7 @@ pub fn create_team(
     app_handle: tauri::AppHandle,
     title: String,
     description: String,
+    main_branch_title: String,
 ) -> Result<Team, String> {
     let mut store = get_store(app_handle);
     match store.get(&title) {
@@ -68,7 +77,7 @@ pub fn create_team(
         }
     };
 
-    let team = Team::new(title.clone(), description);
+    let team = Team::new(title.clone(), description, main_branch_title);
     match store.insert(title, json!(team)) {
         Ok(_) => {
             match store.save() {

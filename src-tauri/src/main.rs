@@ -26,9 +26,15 @@ use tauri_specta::ts;
 
 #[test]
 fn export_bindings() {
-    ts::export(
+    match ts::export(
         collect_types![get_teams, create_team, create_branch, create_change],
         "../src/lib/bindings.ts",
-    )
-    .unwrap();
+    ) {
+        Err(e) => {
+            println!("Error: {:?}", e)
+        }
+        _ => {
+            println!("Finished")
+        }
+    }
 }

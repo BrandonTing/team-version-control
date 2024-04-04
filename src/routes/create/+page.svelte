@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto, preloadData } from '$app/navigation';
+	import { goto } from '$app/navigation';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { FormControl } from '$lib/components/ui/form';
 	import FormDescription from '$lib/components/ui/form/form-description.svelte';
@@ -23,7 +24,7 @@
 		SPA: true,
 		async onSubmit() {
 			try {
-				await createTeam($formData.title, $formData.description);
+				await createTeam($formData.title, $formData.description, $formData.mainBranchTitle);
 				goto(nextUrl);
 			} catch (e) {
 				failMessage = e as string;
@@ -33,37 +34,52 @@
 	const { form: formData, enhance } = form;
 </script>
 
-<form method="POST" use:enhance>
-	<FormField {form} name="title">
-		<FormControl let:attrs>
-			<FormLabel>Team Title</FormLabel>
-			<Input {...attrs} bind:value={$formData.title} placeholder="title" />
-		</FormControl>
-		<FormDescription />
-		<FormFieldErrors />
-	</FormField>
-	<FormField {form} name="description">
-		<FormControl let:attrs>
-			<FormLabel>Description</FormLabel>
-			<Textarea {...attrs} bind:value={$formData.description} placeholder="Describe the team" />
-		</FormControl>
-		<FormDescription />
-		<FormFieldErrors />
-	</FormField>
+<Breadcrumb.Root>
+	<Breadcrumb.List>
+		<Breadcrumb.Item>
+			<Breadcrumb.Link href="/">Home</Breadcrumb.Link>
+		</Breadcrumb.Item>
+		<Breadcrumb.Separator />
+		<Breadcrumb.Item>
+			<Breadcrumb.Page>create new team</Breadcrumb.Page>
+		</Breadcrumb.Item>
+	</Breadcrumb.List>
+</Breadcrumb.Root>
 
-	<Button
-		on:click={() => {
-			goto(nextUrl);
-		}}
-		on:mouseenter={async () => await preloadData(nextUrl)}
-		variant="secondary">cancel</Button
-	>
-	<Button type="submit">submit</Button>
-</form>
+<section class="py-2">
+	<form method="POST" use:enhance>
+		<FormField {form} name="title">
+			<FormControl let:attrs>
+				<FormLabel>Team Title</FormLabel>
+				<Input {...attrs} bind:value={$formData.title} placeholder="title" />
+			</FormControl>
+			<FormDescription />
+			<FormFieldErrors />
+		</FormField>
+		<FormField {form} name="description">
+			<FormControl let:attrs>
+				<FormLabel>Description</FormLabel>
+				<Textarea {...attrs} bind:value={$formData.description} placeholder="Describe the team" />
+			</FormControl>
+			<FormDescription />
+			<FormFieldErrors />
+		</FormField>
+		<FormField {form} name="mainBranchTitle">
+			<FormControl let:attrs>
+				<FormLabel>Main Branch</FormLabel>
+				<Input {...attrs} bind:value={$formData.mainBranchTitle} />
+			</FormControl>
+			<FormDescription />
+			<FormFieldErrors />
+		</FormField>
 
-{#if failMessage !== ''}
-	<Root variant="destructive" class="mt-2">
-		<Title>Error!</Title>
-		<Description>{failMessage}</Description>
-	</Root>
-{/if}
+		<Button type="submit">submit</Button>
+	</form>
+
+	{#if failMessage !== ''}
+		<Root variant="destructive" class="mt-2">
+			<Title>Error!</Title>
+			<Description>{failMessage}</Description>
+		</Root>
+	{/if}
+</section>

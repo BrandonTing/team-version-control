@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import CardTitle from '$lib/components/ui/card/card-title.svelte';
 	import Card from '$lib/components/ui/card/card.svelte';
 	import type { Team } from '@/bindings';
+	import Button from '@/components/ui/button/button.svelte';
 	import CardDescription from '@/components/ui/card/card-description.svelte';
 
-	let {
+	const {
 		team
 	}: {
 		team: Team;
@@ -16,4 +18,10 @@
 	<CardDescription>
 		{team.description}
 	</CardDescription>
+	<Button
+		class="h-5"
+		on:click={() => {
+			goto(`/team?title=${team.title}`);
+		}}>Detail</Button
+	>
 </Card>
