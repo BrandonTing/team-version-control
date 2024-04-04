@@ -49,7 +49,13 @@
 						.filter((team) => team.title.includes(searchKw)) as team}
 						<Table.Row>
 							<Table.Cell class="font-medium">
-								<Button variant="link" class="px-0">
+								<Button
+									variant="link"
+									class="px-0"
+									on:click={() => {
+										goto(`./team?title=${encodeURIComponent(team.title)}`);
+									}}
+								>
 									{team.title}
 								</Button>
 							</Table.Cell>

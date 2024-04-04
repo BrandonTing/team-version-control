@@ -2,7 +2,7 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 
 	import { page } from '$app/stores';
-	const teamTitle = $page.url.searchParams.get('title');
+	const teamTitle = decodeURIComponent($page.url.searchParams.get('title') ?? '');
 </script>
 
 <Breadcrumb.Root>
