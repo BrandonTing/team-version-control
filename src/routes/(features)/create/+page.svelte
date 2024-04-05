@@ -48,40 +48,38 @@
 	</Breadcrumb.List>
 </Breadcrumb.Root>
 
-<section class="py-2">
-	<form method="POST" use:enhance>
-		<FormField {form} name="title">
-			<FormControl let:attrs>
-				<FormLabel>Team Title</FormLabel>
-				<Input {...attrs} bind:value={$formData.title} placeholder="title" />
-			</FormControl>
-			<FormDescription />
-			<FormFieldErrors />
-		</FormField>
-		<FormField {form} name="description">
-			<FormControl let:attrs>
-				<FormLabel>Description</FormLabel>
-				<Textarea {...attrs} bind:value={$formData.description} placeholder="Describe the team" />
-			</FormControl>
-			<FormDescription />
-			<FormFieldErrors />
-		</FormField>
-		<FormField {form} name="mainBranchTitle">
-			<FormControl let:attrs>
-				<FormLabel>Main Branch</FormLabel>
-				<Input {...attrs} bind:value={$formData.mainBranchTitle} />
-			</FormControl>
-			<FormDescription />
-			<FormFieldErrors />
-		</FormField>
+<form method="POST" use:enhance>
+	<FormField {form} name="title">
+		<FormControl let:attrs>
+			<FormLabel>Team Title</FormLabel>
+			<Input {...attrs} bind:value={$formData.title} placeholder="title" />
+		</FormControl>
+		<FormDescription />
+		<FormFieldErrors />
+	</FormField>
+	<FormField {form} name="description">
+		<FormControl let:attrs>
+			<FormLabel>Description</FormLabel>
+			<Textarea {...attrs} bind:value={$formData.description} placeholder="Describe the team" />
+		</FormControl>
+		<FormDescription />
+		<FormFieldErrors />
+	</FormField>
+	<FormField {form} name="mainBranchTitle">
+		<FormControl let:attrs>
+			<FormLabel>Main Branch</FormLabel>
+			<Input {...attrs} bind:value={$formData.mainBranchTitle} />
+		</FormControl>
+		<FormDescription />
+		<FormFieldErrors />
+	</FormField>
 
-		<Button type="submit">submit</Button>
-	</form>
+	<Button type="submit">submit</Button>
+</form>
 
-	{#if failMessage !== ''}
-		<Root variant="destructive" class="mt-2">
-			<Title>Error!</Title>
-			<Description>{failMessage}</Description>
-		</Root>
-	{/if}
-</section>
+{#if failMessage !== ''}
+	<Root variant="destructive" class="mt-2">
+		<Title>Error!</Title>
+		<Description>{failMessage}</Description>
+	</Root>
+{/if}
