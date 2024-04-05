@@ -17,16 +17,17 @@
 		FormLabel
 	} from '@/components/ui/form';
 	import { Input } from '@/components/ui/input';
+	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
 	import { Textarea } from '@/components/ui/textarea';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import { createBranchFormSchema } from './schema';
 	const { data }: { data: PageData } = $props();
-	const { title, team } = data;
+	const { title } = data;
 	if (!$page.url.searchParams.get('branch')) {
 		let query = new URLSearchParams($page.url.searchParams.toString());
-		query.set('branch', team.current_branch_title);
+		query.set('branch', data.team.current_branch_title);
 		goto(`?${query.toString()}`);
 	}
 	const branchParam = $derived(() => {
@@ -38,7 +39,6 @@
 	});
 	let failMessage = $state('');
 	let selectOpen = $state(false);
-	let sheetOpen = $state(false);
 	const form = superForm(data.form, {
 		validators: zodClient(createBranchFormSchema),
 		SPA: true,
@@ -48,7 +48,8 @@
 			} catch (e) {
 				failMessage = e as string;
 			}
-		}
+		},
+		invalidateAll: true
 	});
 	const { form: formData, enhance, submit } = form;
 </script>
@@ -81,9 +82,11 @@
 			<Select.Value placeholder="Select a Branch" />
 		</Select.Trigger>
 		<Select.Content>
-			{#each team.branches as branch}
-				<Select.Item value={branch.title} label={branch.title}>{branch.title}</Select.Item>
-			{/each}
+			<ScrollArea class="h-40">
+				{#each data.team.branches as branch}
+					<Select.Item value={branch.title} label={branch.title}>{branch.title}</Select.Item>
+				{/each}
+			</ScrollArea>
 			<Separator />
 			<Sheet.Root
 				onOpenChange={(value) => {
@@ -93,7 +96,7 @@
 				}}
 			>
 				<Sheet.Trigger asChild let:builder>
-					<Button variant="ghost" class="w-full" size="sm" builders={[builder]}>Open</Button>
+					<Button variant="ghost" class="w-full" size="sm" builders={[builder]}>New</Button>
 				</Sheet.Trigger>
 				<Sheet.Content side="right">
 					<Sheet.Header>

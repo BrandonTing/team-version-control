@@ -128,7 +128,7 @@ pub fn create_branch(
     title: String,
     description: String,
 ) -> Result<(), String> {
-    let store = get_store(app_handle);
+    let mut store = get_store(app_handle);
     let mut detail = match store.get(&team_title) {
         None => {
             return Err("Target team doesn't exist.".to_string());
@@ -154,6 +154,24 @@ pub fn create_branch(
         None => {
             println!("add a branch");
             detail.branches.push(branch);
+            match store.insert(team_title, json!(detail)) {
+                Err(e) => {
+                    println!("{:?}", e);
+                    return Err("Failed to update branch".to_string());
+                }
+                _ => {
+                    println!("branch inserted");
+                }
+            };
+            match store.save() {
+                Err(e) => {
+                    println!("{:?}", e);
+                    return Err("Failed to save branch update".to_string());
+                }
+                _ => {
+                    println!("branch saved");
+                }
+            };
         }
     };
     return Ok(());

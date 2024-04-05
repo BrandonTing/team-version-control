@@ -17,8 +17,9 @@ export async function load({url}) {
     }
 	try {
 		const title = decodeURIComponent(rawTeamTitle ?? '')
+		console.log("load")
 		return {
-			team: await getTeam(title),
+			team:await getTeam(title),
 			title,
 			form: await superValidate(zod(createBranchFormSchema)),
 		}
