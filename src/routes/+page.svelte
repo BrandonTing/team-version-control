@@ -39,7 +39,6 @@
 					<Table.Row>
 						<Table.Head class="w-[100px]">Title</Table.Head>
 						<Table.Head>Description</Table.Head>
-						<Table.Head>Current Branch</Table.Head>
 						<Table.Head>Created At</Table.Head>
 					</Table.Row>
 				</Table.Header>
@@ -60,7 +59,6 @@
 								</Button>
 							</Table.Cell>
 							<Table.Cell>{team.description}</Table.Cell>
-							<Table.Cell>{team.current_branch_title}</Table.Cell>
 							<Table.Cell>{new Date(team.created_at * 1000)}</Table.Cell>
 						</Table.Row>
 					{/each}

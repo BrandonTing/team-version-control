@@ -7,22 +7,29 @@ use uuid::Uuid;
 
 use crate::store::get_store;
 
-#[derive(Serialize, Type, Deserialize, Debug)]
+#[derive(Serialize, Type, Deserialize)]
 pub struct Team {
     pub title: String,
     pub description: String,
     #[specta(type = u32)]
     pub created_at: i64,
+}
+
+#[derive(Serialize, Type, Deserialize)]
+pub struct TeamDetail {
+    pub team: Team,
     pub branches: Vec<Branch>,
     pub current_branch_title: String,
 }
 
-impl Team {
+impl TeamDetail {
     fn new(title: String, description: String, main_branch_title: String) -> Self {
-        Team {
-            title: title.to_string(),
-            description: description.to_string(),
-            created_at: Utc::now().timestamp(),
+        TeamDetail {
+            team: Team {
+                title: title.to_string(),
+                description: description.to_string(),
+                created_at: Utc::now().timestamp(),
+            },
             branches: vec![Branch {
                 title: main_branch_title.clone(),
                 description: "".to_string(),
@@ -34,7 +41,7 @@ impl Team {
     }
 }
 
-#[derive(Serialize, Type, Deserialize, Clone, Debug)]
+#[derive(Serialize, Type, Deserialize, Clone)]
 pub struct Branch {
     pub title: String,
     pub description: String,
@@ -42,30 +49,43 @@ pub struct Branch {
     pub current_change_id: String,
 }
 
-#[derive(Serialize, Type, Deserialize, Clone, Debug)]
+#[derive(Serialize, Type, Deserialize, Clone)]
 pub struct Change {
     pub id: String,
     pub message: String,
     pub context: String,
 }
 
+fn reset_store(app_handle: tauri::AppHandle) {
+    let mut store = get_store(app_handle);
+    let _ = store.clear();
+    let _ = store.save();
+}
+
 #[tauri::command]
 #[specta::specta] // <-- This bit here
 pub fn get_teams(app_handle: tauri::AppHandle) -> Result<Vec<Team>, String> {
+    // reset_store(app_handle.clone());
     let store = get_store(app_handle);
-    match serde_json::from_value::<Vec<Team>>(store.values().map(|x| x.clone()).collect()) {
-        Ok(v) => Ok(v),
-        Err(_) => Err("Failed to fetch teams".to_string()),
+    match serde_json::from_value::<Vec<TeamDetail>>(store.values().map(|x| x.clone()).collect()) {
+        Ok(v) => Ok(v.into_iter().map(|x| x.team).collect()),
+        Err(e) => {
+            println!("{:?}", e);
+            Err("Failed to fetch teams".to_string())
+        }
     }
 }
 
 #[tauri::command]
 #[specta::specta] // <-- This bit here
-pub fn get_team(app_handle: tauri::AppHandle, key: String) -> Result<Team, String> {
+pub fn get_team(app_handle: tauri::AppHandle, key: String) -> Result<TeamDetail, String> {
     let store = get_store(app_handle);
-    match serde_json::from_value::<Team>(store.get(key).unwrap().clone()) {
+    match serde_json::from_value::<TeamDetail>(store.get(key).unwrap().clone()) {
         Ok(v) => Ok(v),
-        Err(_) => Err("Failed to get target team".to_string()),
+        Err(e) => {
+            println!("{:?}", e);
+            Err("Failed to get target team".to_string())
+        }
     }
 }
 
@@ -76,7 +96,7 @@ pub fn create_team(
     title: String,
     description: String,
     main_branch_title: String,
-) -> Result<Team, String> {
+) -> Result<TeamDetail, String> {
     let mut store = get_store(app_handle);
     match store.get(&title) {
         Some(_) => {
@@ -87,14 +107,14 @@ pub fn create_team(
         }
     };
 
-    let team = Team::new(title.clone(), description, main_branch_title);
-    match store.insert(title, json!(team)) {
+    let detail = TeamDetail::new(title.clone(), description, main_branch_title);
+    match store.insert(title, json!(detail)) {
         Ok(_) => {
             match store.save() {
                 Err(_) => return Err("Failed to save info to file".to_string()),
                 _ => println!("saved"),
             };
-            return Ok(team);
+            return Ok(detail);
         }
         Err(_) => return Err("Failed to insert team to store".to_string()),
     }
@@ -109,11 +129,11 @@ pub fn create_branch(
     description: String,
 ) -> Result<(), String> {
     let store = get_store(app_handle);
-    let mut team = match store.get(&team_title) {
+    let mut detail = match store.get(&team_title) {
         None => {
             return Err("Target team doesn't exist.".to_string());
         }
-        Some(v) => match from_value::<Team>(v.clone()) {
+        Some(v) => match from_value::<TeamDetail>(v.clone()) {
             Err(_) => {
                 return Err("Failed to parse team.".to_string());
             }
@@ -126,14 +146,14 @@ pub fn create_branch(
         history: vec![],
         current_change_id: "".to_string(),
     };
-    match team.branches.iter().find(|x| x.title == title) {
+    match detail.branches.iter().find(|x| x.title == title) {
         Some(_) => {
             println!("failed");
             return Err("Please provide unique title for the branch.".to_string());
         }
         None => {
             println!("add a branch");
-            team.branches.push(branch);
+            detail.branches.push(branch);
         }
     };
     return Ok(());
@@ -149,18 +169,18 @@ pub fn create_change(
     context: String,
 ) -> Result<Change, String> {
     let store = get_store(app_handle);
-    let mut team = match store.get(&team_title) {
+    let mut detail = match store.get(&team_title) {
         None => {
             return Err("Target team doesn't exist.".to_string());
         }
-        Some(v) => match from_value::<Team>(v.clone()) {
+        Some(v) => match from_value::<TeamDetail>(v.clone()) {
             Err(_) => {
                 return Err("Failed to parse team.".to_string());
             }
             Ok(t) => t,
         },
     };
-    let branch = match team.branches.iter_mut().find(|x| x.title == branch_title) {
+    let branch = match detail.branches.iter_mut().find(|x| x.title == branch_title) {
         None => {
             return Err("Failed to find target branch.".to_string());
         }

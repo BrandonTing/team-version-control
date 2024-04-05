@@ -15,7 +15,7 @@ export function getTeams() {
 }
 
 export function getTeam(key: string) {
-    return invoke()<Team>("get_team", { key })
+    return invoke()<TeamDetail>("get_team", { key })
 }
 
 export function createTeam(title: string, description: string, mainBranchTitle: string) {
@@ -30,6 +30,7 @@ export function createChange(teamTitle: string, branchTitle: string, message: st
     return invoke()<Change>("create_change", { teamTitle,branchTitle,message,context })
 }
 
+export type TeamDetail = { team: Team; branches: Branch[]; current_branch_title: string }
+export type Team = { title: string; description: string; created_at: number }
 export type Branch = { title: string; description: string; history: Change[]; current_change_id: string }
 export type Change = { id: string; message: string; context: string }
-export type Team = { title: string; description: string; created_at: number; branches: Branch[]; current_branch_title: string }
