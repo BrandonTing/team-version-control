@@ -61,6 +61,16 @@ pub fn get_teams(app_handle: tauri::AppHandle) -> Result<Vec<Team>, String> {
 
 #[tauri::command]
 #[specta::specta] // <-- This bit here
+pub fn get_team(app_handle: tauri::AppHandle, key: String) -> Result<Team, String> {
+    let store = get_store(app_handle);
+    match serde_json::from_value::<Team>(store.get(key).unwrap().clone()) {
+        Ok(v) => Ok(v),
+        Err(_) => Err("Failed to get target team".to_string()),
+    }
+}
+
+#[tauri::command]
+#[specta::specta] // <-- This bit here
 pub fn create_team(
     app_handle: tauri::AppHandle,
     title: String,
@@ -97,7 +107,7 @@ pub fn create_branch(
     team_title: String,
     title: String,
     description: String,
-) -> Result<Branch, String> {
+) -> Result<(), String> {
     let store = get_store(app_handle);
     let mut team = match store.get(&team_title) {
         None => {
@@ -118,13 +128,15 @@ pub fn create_branch(
     };
     match team.branches.iter().find(|x| x.title == title) {
         Some(_) => {
+            println!("failed");
             return Err("Please provide unique title for the branch.".to_string());
         }
         None => {
-            team.branches.push(branch.clone());
+            println!("add a branch");
+            team.branches.push(branch);
         }
     };
-    return Ok(branch);
+    return Ok(());
 }
 
 #[tauri::command]

@@ -14,12 +14,16 @@ export function getTeams() {
     return invoke()<Team[]>("get_teams")
 }
 
+export function getTeam(key: string) {
+    return invoke()<Team>("get_team", { key })
+}
+
 export function createTeam(title: string, description: string, mainBranchTitle: string) {
     return invoke()<Team>("create_team", { title,description,mainBranchTitle })
 }
 
 export function createBranch(teamTitle: string, title: string, description: string) {
-    return invoke()<Branch>("create_branch", { teamTitle,title,description })
+    return invoke()<null>("create_branch", { teamTitle,title,description })
 }
 
 export function createChange(teamTitle: string, branchTitle: string, message: string, context: string) {

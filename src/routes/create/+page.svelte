@@ -2,11 +2,13 @@
 	import { goto } from '$app/navigation';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { FormControl } from '$lib/components/ui/form';
-	import FormDescription from '$lib/components/ui/form/form-description.svelte';
-	import FormFieldErrors from '$lib/components/ui/form/form-field-errors.svelte';
-	import FormField from '$lib/components/ui/form/form-field.svelte';
-	import FormLabel from '$lib/components/ui/form/form-label.svelte';
+	import {
+		FormControl,
+		FormDescription,
+		FormField,
+		FormFieldErrors,
+		FormLabel
+	} from '$lib/components/ui/form';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import { createTeam } from '@/bindings';
