@@ -17,9 +17,10 @@ export async function load({url}) {
 	try {
 		const title = decodeURIComponent(rawTeamTitle ?? '')
 		const branchTitle = url.searchParams.get('branch')
+		const changeId = url.searchParams.get('change')
 		const team = await getTeam(title);
 		const branch = team.branches.find((val) => val.title === branchTitle);
-		const change = branch?.history.find((val) => val.id === branch.current_change_id);
+		const change = branch?.history.find((val) => val.id === changeId);
 		return {
 			team,
 			title,

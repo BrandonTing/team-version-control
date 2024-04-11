@@ -27,7 +27,7 @@ export function createBranch(teamTitle: string, title: string, description: stri
 }
 
 export function createChange(teamTitle: string, branchTitle: string, message: string, context: string) {
-    return invoke()<null>("create_change", { teamTitle,branchTitle,message,context })
+    return invoke()<string>("create_change", { teamTitle,branchTitle,message,context })
 }
 
 export function resetStore() {

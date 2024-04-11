@@ -186,7 +186,7 @@ pub fn create_change(
     branch_title: String,
     message: String,
     context: String,
-) -> Result<(), String> {
+) -> Result<String, String> {
     let mut store = get_store(app_handle);
     let mut detail = match store.get(&team_title) {
         None => {
@@ -212,8 +212,7 @@ pub fn create_change(
         context,
     };
     branch.history.push(change.clone());
-    branch.current_change_id = id;
-    println!("{:?}", detail);
+    branch.current_change_id = id.clone();
     match store.insert(team_title, json!(detail)) {
         Err(e) => {
             println!("{:?}", e);
@@ -233,5 +232,5 @@ pub fn create_change(
         }
     };
 
-    return Ok(());
+    return Ok(id);
 }
