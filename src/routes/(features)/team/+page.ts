@@ -3,7 +3,7 @@ import { getTeam } from '@/bindings';
 import { error } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { createBranchFormSchema } from './schema.js';
+import { createBranchFormSchema, createChangeFormSchema } from './schema.js';
 
 // since there's no dynamic data here, we can prerender
 // it so that it gets served as a static asset in production
@@ -16,11 +16,20 @@ export async function load({url}) {
     }
 	try {
 		const title = decodeURIComponent(rawTeamTitle ?? '')
-		console.log("load")
+		const branchTitle = url.searchParams.get('branch')
+		const team = await getTeam(title);
+		const branch = team.branches.find((val) => val.title === branchTitle);
+		const change = branch?.history.find((val) => val.id === branch.current_change_id);
 		return {
-			team:await getTeam(title),
+			team,
 			title,
-			form: await superValidate(zod(createBranchFormSchema)),
+			branchTitle,
+			branch,
+			change,
+			createBranchForm: await superValidate(zod(createBranchFormSchema)),
+			createChangeForm: await superValidate(zod(createChangeFormSchema, {
+				defaults: {context: change?.context ?? "", message: ""}
+			})),
 		}
 	} catch (e) {
 		error(500, {

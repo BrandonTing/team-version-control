@@ -5,3 +5,10 @@ export const createBranchFormSchema = z.object({
 });
    
 export type FormSchema = typeof createBranchFormSchema;
+
+export const createChangeFormSchema = z.object({
+    message: z.string().min(1).max(50),
+    context: z.string().min(1),
+});
+   
+export type CreateChangeFormSchema = typeof createChangeFormSchema;

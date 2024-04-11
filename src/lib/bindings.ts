@@ -19,7 +19,7 @@ export function getTeam(key: string) {
 }
 
 export function createTeam(title: string, description: string, mainBranchTitle: string) {
-    return invoke()<Team>("create_team", { title,description,mainBranchTitle })
+    return invoke()<TeamDetail>("create_team", { title,description,mainBranchTitle })
 }
 
 export function createBranch(teamTitle: string, title: string, description: string) {
@@ -27,7 +27,11 @@ export function createBranch(teamTitle: string, title: string, description: stri
 }
 
 export function createChange(teamTitle: string, branchTitle: string, message: string, context: string) {
-    return invoke()<Change>("create_change", { teamTitle,branchTitle,message,context })
+    return invoke()<null>("create_change", { teamTitle,branchTitle,message,context })
+}
+
+export function resetStore() {
+    return invoke()<null>("reset_store")
 }
 
 export type TeamDetail = { team: Team; branches: Branch[]; current_branch_title: string }

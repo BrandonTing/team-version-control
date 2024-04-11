@@ -2,7 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod store;
 mod version_control;
-use version_control::{create_branch, create_change, create_team, get_team, get_teams};
+use version_control::{
+    create_branch, create_change, create_team, get_team, get_teams, reset_store,
+};
 
 fn main() {
     let _ = fix_path_env::fix(); // <---- Add this
@@ -14,7 +16,8 @@ fn main() {
             get_team,
             create_team,
             create_branch,
-            create_change
+            create_change,
+            reset_store
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -33,7 +36,8 @@ fn export_bindings() {
             get_team,
             create_team,
             create_branch,
-            create_change
+            create_change,
+            reset_store
         ],
         "../src/lib/bindings.ts",
     ) {

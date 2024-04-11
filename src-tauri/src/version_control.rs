@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::store::get_store;
 
-#[derive(Serialize, Type, Deserialize)]
+#[derive(Serialize, Type, Deserialize, Debug)]
 pub struct Team {
     pub title: String,
     pub description: String,
@@ -15,7 +15,7 @@ pub struct Team {
     pub created_at: i64,
 }
 
-#[derive(Serialize, Type, Deserialize)]
+#[derive(Serialize, Type, Deserialize, Debug)]
 pub struct TeamDetail {
     pub team: Team,
     pub branches: Vec<Branch>,
@@ -41,7 +41,7 @@ impl TeamDetail {
     }
 }
 
-#[derive(Serialize, Type, Deserialize, Clone)]
+#[derive(Serialize, Type, Deserialize, Clone, Debug)]
 pub struct Branch {
     pub title: String,
     pub description: String,
@@ -49,14 +49,16 @@ pub struct Branch {
     pub current_change_id: String,
 }
 
-#[derive(Serialize, Type, Deserialize, Clone)]
+#[derive(Serialize, Type, Deserialize, Clone, Debug)]
 pub struct Change {
     pub id: String,
     pub message: String,
     pub context: String,
 }
 
-fn reset_store(app_handle: tauri::AppHandle) {
+#[tauri::command]
+#[specta::specta] // <-- This bit here
+pub fn reset_store(app_handle: tauri::AppHandle) {
     let mut store = get_store(app_handle);
     let _ = store.clear();
     let _ = store.save();
@@ -65,7 +67,6 @@ fn reset_store(app_handle: tauri::AppHandle) {
 #[tauri::command]
 #[specta::specta] // <-- This bit here
 pub fn get_teams(app_handle: tauri::AppHandle) -> Result<Vec<Team>, String> {
-    // reset_store(app_handle.clone());
     let store = get_store(app_handle);
     match serde_json::from_value::<Vec<TeamDetail>>(store.values().map(|x| x.clone()).collect()) {
         Ok(v) => Ok(v.into_iter().map(|x| x.team).collect()),
@@ -185,8 +186,8 @@ pub fn create_change(
     branch_title: String,
     message: String,
     context: String,
-) -> Result<Change, String> {
-    let store = get_store(app_handle);
+) -> Result<(), String> {
+    let mut store = get_store(app_handle);
     let mut detail = match store.get(&team_title) {
         None => {
             return Err("Target team doesn't exist.".to_string());
@@ -204,11 +205,33 @@ pub fn create_change(
         }
         Some(branch) => branch,
     };
+    let id = Uuid::new_v4().to_string();
     let change = Change {
-        id: Uuid::new_v4().to_string(),
+        id: id.clone(),
         message,
         context,
     };
     branch.history.push(change.clone());
-    return Ok(change);
+    branch.current_change_id = id;
+    println!("{:?}", detail);
+    match store.insert(team_title, json!(detail)) {
+        Err(e) => {
+            println!("{:?}", e);
+            return Err("Failed to update change".to_string());
+        }
+        _ => {
+            println!("change inserted");
+        }
+    };
+    match store.save() {
+        Err(e) => {
+            println!("{:?}", e);
+            return Err("Failed to save change update".to_string());
+        }
+        _ => {
+            println!("change saved");
+        }
+    };
+
+    return Ok(());
 }

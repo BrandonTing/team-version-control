@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, preloadData } from '$app/navigation';
 	import * as Table from '$lib/components/ui/table';
+	import { resetStore } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Input } from '@/components/ui/input';
@@ -21,6 +22,12 @@
 				goto('./create');
 			}}
 			on:mouseenter={async () => await preloadData('/create')}>New</Button
+		>
+		<Button
+			variant="outline"
+			on:click={async () => {
+				await resetStore();
+			}}>Clear teams</Button
 		>
 	</div>
 	{#await teamsRequest}
