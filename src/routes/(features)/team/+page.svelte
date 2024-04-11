@@ -1,3 +1,4 @@
+<!-- FIXME refactor to smaller components -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -26,16 +27,6 @@
 	import { createBranchFormSchema, createChangeFormSchema } from './schema';
 	const { data }: { data: PageData } = $props();
 	const { title } = data;
-	if (!$page.url.searchParams.get('branch')) {
-		let query = new URLSearchParams($page.url.searchParams.toString());
-		query.set('branch', data.team.current_branch_title);
-		goto(`?${query.toString()}`);
-	}
-	if (!$page.url.searchParams.get('change')) {
-		let query = new URLSearchParams($page.url.searchParams.toString());
-		query.set('change', data.branch?.current_change_id ?? '');
-		goto(`?${query.toString()}`);
-	}
 
 	const branchParam = $derived(() => {
 		const value = data.branchTitle ?? '';
@@ -44,7 +35,6 @@
 			label: value
 		};
 	});
-
 	let failMessage = $state('');
 	let selectOpen = $state(false);
 	const createBranchForm = superForm(data.createBranchForm, {
