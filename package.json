@@ -40,6 +40,7 @@
   "dependencies": {
     "bits-ui": "^0.21.2",
     "clsx": "^2.1.0",
+    "effect": "^3.0.6",
     "formsnap": "^1.0.0",
     "lucide-svelte": "^0.367.0",
     "sveltekit-superforms": "^2.11.0",

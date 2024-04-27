@@ -1,22 +1,46 @@
 import { goto } from '$app/navigation';
-import { getTeam, type Branch, type Change } from '@/bindings';
-import { error } from '@sveltejs/kit';
+import { getTeam, type Branch, type Change } from '@/bindings.js';
+import { error, redirect } from '@sveltejs/kit';
+import { Effect, Either } from "effect";
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { createBranchFormSchema, createChangeFormSchema } from './schema.js';
-
 // since there's no dynamic data here, we can prerender
 // it so that it gets served as a static asset in production
 export const prerender = true;
+  
+class RedirectHomeError {
+	readonly _tag = "RedirectHomeError"
+}
 
 export async function load({url}) {
-    const rawTeamTitle = url.searchParams.get("title")
-    if(!rawTeamTitle) {
-        goto("/")
-    }
+	const eitherTitle = await Effect.gen(function* (){
+		const raw = url.searchParams.get("title");
 
+		if(!raw) {
+			return yield* Effect.fail(new RedirectHomeError())
+		}
+
+		const title = yield* Effect.try({
+			try: () => {
+				return decodeURIComponent(raw)	
+			},
+			catch: () => {
+				return new RedirectHomeError()
+			}
+		})
+
+		return title
+	}).pipe(Effect.either, Effect.runPromise)
+
+	if(Either.isLeft(eitherTitle)) {
+		throw redirect(302, "/")
+	}
+
+	const title = eitherTitle.right
+	
 	try {
-		const title = decodeURIComponent(rawTeamTitle ?? '')
+		// Here
 		const branchTitle = url.searchParams.get('branch')
 		const changeId = url.searchParams.get('change')
 		const team = await getTeam(title);
