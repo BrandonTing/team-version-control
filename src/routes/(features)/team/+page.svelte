@@ -22,7 +22,7 @@
 	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
 	import { Textarea } from '@/components/ui/textarea';
 	import { InvokeTauriError } from '@/errors';
-	import { Effect, Either } from 'effect';
+	import { Effect } from 'effect';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
@@ -51,10 +51,13 @@
 				catch: (e) => {
 					return new InvokeTauriError('createBranch', e as string);
 				}
-			}).pipe(Effect.either, Effect.runPromise);
-			if (Either.isLeft(fail)) {
-				failMessage = fail.left.message;
-			}
+			}).pipe(
+				Effect.catchTag('InvokeTauriError', (e) => {
+					failMessage = e.message;
+					return Effect.succeed(null);
+				}),
+				Effect.runPromise
+			);
 		},
 		invalidateAll: true
 	});
@@ -63,6 +66,7 @@
 	function checkEdited(e: Event) {
 		edited = (e.target as HTMLTextAreaElement).value !== (data.change?.context ?? '');
 	}
+
 	const createChangeForm = superForm(data.createChangeForm, {
 		validators: zodClient(createChangeFormSchema),
 		SPA: true,
@@ -83,12 +87,19 @@
 					goto(`?${query.toString()}`);
 				},
 				catch: (e) => {
+					if (e instanceof InvalidBranchTitleError) {
+						goto('/');
+						return;
+					}
 					return new InvokeTauriError('createChange', e as string);
 				}
-			}).pipe(Effect.either, Effect.runPromise);
-			if (Either.isLeft(fail)) {
-				failMessage = fail.left.message;
-			}
+			}).pipe(
+				Effect.catchTag('InvokeTauriError', (e) => {
+					failMessage = e.message;
+					return Effect.succeed(null);
+				}),
+				Effect.runPromise
+			);
 		},
 
 		invalidateAll: false
