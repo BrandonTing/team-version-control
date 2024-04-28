@@ -21,9 +21,12 @@
 	import Label from '@/components/ui/label/label.svelte';
 	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
 	import { Textarea } from '@/components/ui/textarea';
+	import { InvokeTauriError } from '@/errors';
+	import { Effect, Either } from 'effect';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
+	import { InvalidBranchTitleError } from './error';
 	import { createBranchFormSchema, createChangeFormSchema } from './schema';
 	const { data }: { data: PageData } = $props();
 	const { title } = data;
@@ -40,11 +43,17 @@
 	const createBranchForm = superForm(data.createBranchForm, {
 		validators: zodClient(createBranchFormSchema),
 		SPA: true,
-		async onSubmit() {
-			try {
-				await createBranch(title, $formData.title, $formData.description);
-			} catch (e) {
-				failMessage = e as string;
+		onSubmit: async () => {
+			const fail = await Effect.tryPromise({
+				try: async () => {
+					await createBranch(title, $formData.title, $formData.description);
+				},
+				catch: (e) => {
+					return new InvokeTauriError('createBranch', e as string);
+				}
+			}).pipe(Effect.either, Effect.runPromise);
+			if (Either.isLeft(fail)) {
+				failMessage = fail.left.message;
 			}
 		},
 		invalidateAll: true
@@ -57,24 +66,31 @@
 	const createChangeForm = superForm(data.createChangeForm, {
 		validators: zodClient(createChangeFormSchema),
 		SPA: true,
-		async onSubmit() {
-			if (!data.branchTitle) {
-				return;
-			}
-			try {
-				const changeId = await createChange(
-					title,
-					data.branchTitle,
-					$createChangeFormData.message,
-					$createChangeFormData.context
-				);
-				let query = new URLSearchParams($page.url.searchParams.toString());
-				query.set('change', changeId);
-				goto(`?${query.toString()}`);
-			} catch (e) {
-				failMessage = e as string;
+		onSubmit: async () => {
+			const fail = await Effect.tryPromise({
+				try: async () => {
+					if (!data.branchTitle) {
+						throw new InvalidBranchTitleError();
+					}
+					const changeId = await createChange(
+						title,
+						data.branchTitle,
+						$createChangeFormData.message,
+						$createChangeFormData.context
+					);
+					let query = new URLSearchParams($page.url.searchParams.toString());
+					query.set('change', changeId);
+					goto(`?${query.toString()}`);
+				},
+				catch: (e) => {
+					return new InvokeTauriError('createChange', e as string);
+				}
+			}).pipe(Effect.either, Effect.runPromise);
+			if (Either.isLeft(fail)) {
+				failMessage = fail.left.message;
 			}
 		},
+
 		invalidateAll: false
 	});
 	const { form: createChangeFormData } = createChangeForm;

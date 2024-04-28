@@ -1,5 +1,5 @@
 import { getTeam } from '@/bindings.js';
-import { InvokeTauriError, RedirectHomeError } from '@/errors.js';
+import { InvokeTauriError, RedirectError } from '@/errors.js';
 import { error, redirect } from '@sveltejs/kit';
 import { Effect, Either } from "effect";
 import { superValidate } from 'sveltekit-superforms';
@@ -19,7 +19,7 @@ export async function load({url}) {
 			return decodeURIComponent(raw)
 		},
 		catch: () => {
-			return new RedirectHomeError("/")
+			return new RedirectError("/")
 		}
 	})
 	const eitherTitle = checkTitle.pipe(Effect.either, Effect.runSync)
@@ -28,6 +28,7 @@ export async function load({url}) {
 	}
 	const getBranchInfo = Effect.tryPromise({
 		try: async () => {
+			
 			const title = eitherTitle.right
 			const team = await getTeam(title);
 			const branchTitle = url.searchParams.get('branch')
@@ -37,7 +38,7 @@ export async function load({url}) {
 				const branch = team.branches.find((val) => val.title === team.current_branch_title);
 				query.set('branch', team.current_branch_title);
 				query.set('change', branch?.current_change_id ?? '');
-				throw new RedirectHomeError(`/team?${query.toString()}`)
+				throw new RedirectError(`/team?${query.toString()}`)
 			}
 			
 			const branch = team.branches.find((val) => val.title === branchTitle);
@@ -56,10 +57,10 @@ export async function load({url}) {
 	
 		},
 		catch: (e) => {
-			if(e instanceof RedirectHomeError) {
+			if(e instanceof RedirectError) {
 				return e
 			}
-			return new InvokeTauriError("getTeam")
+			return new InvokeTauriError("getTeam", e as string)
 		}
 	})
 	const eitherData = await getBranchInfo.pipe(
@@ -67,10 +68,9 @@ export async function load({url}) {
 		Effect.runPromise
 	)
 	if(Either.isLeft(eitherData)) {
-		if(eitherData.left instanceof RedirectHomeError) {
+		if(eitherData.left instanceof RedirectError) {
 			throw redirect(302, eitherData.left.path)
 		}
-		console.log('wefwefwef99k99j')
 		throw error(500, "failed to get team data")
 	}
 	return eitherData.right
