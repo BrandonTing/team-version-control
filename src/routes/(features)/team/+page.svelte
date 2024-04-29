@@ -44,7 +44,7 @@
 		validators: zodClient(createBranchFormSchema),
 		SPA: true,
 		onSubmit: async () => {
-			const fail = await Effect.tryPromise({
+			await Effect.tryPromise({
 				try: async () => {
 					await createBranch(title, $formData.title, $formData.description);
 				},
@@ -71,7 +71,7 @@
 		validators: zodClient(createChangeFormSchema),
 		SPA: true,
 		onSubmit: async () => {
-			const fail = await Effect.tryPromise({
+			await Effect.tryPromise({
 				try: async () => {
 					if (!data.branchTitle) {
 						throw new InvalidBranchTitleError();

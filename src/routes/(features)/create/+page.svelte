@@ -13,6 +13,8 @@
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import { createTeam } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
+	import { InvokeTauriError } from '@/errors';
+	import { Effect } from 'effect';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { createTeamFormSchema } from './schema';
@@ -25,12 +27,21 @@
 		validators: zodClient(createTeamFormSchema),
 		SPA: true,
 		async onSubmit() {
-			try {
-				await createTeam($formData.title, $formData.description, $formData.mainBranchTitle);
-				goto(nextUrl);
-			} catch (e) {
-				failMessage = e as string;
-			}
+			await Effect.tryPromise({
+				try: async () => {
+					await createTeam($formData.title, $formData.description, $formData.mainBranchTitle);
+					goto(nextUrl);
+				},
+				catch: (e) => {
+					return new InvokeTauriError('createTeam', e as string);
+				}
+			}).pipe(
+				Effect.catchTag('InvokeTauriError', (e) => {
+					failMessage = e.message;
+					return Effect.succeed(null);
+				}),
+				Effect.runPromise
+			);
 		}
 	});
 	const { form: formData, enhance } = form;
