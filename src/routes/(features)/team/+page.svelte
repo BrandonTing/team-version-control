@@ -206,85 +206,87 @@
 	<p class="text-sm text-muted-foreground">
 		{data.branch.description}
 	</p>
-	{#if data.change}
-		<div class="relative">
-			<h2
-				class="pb-2 text-3xl font-semibold tracking-tight transition-colors border-b scroll-m-20 first:mt-0"
-			>
+	<div class="relative">
+		<h2
+			class="pb-2 text-3xl font-semibold tracking-tight transition-colors border-b scroll-m-20 first:mt-0"
+		>
+			{#if data.change}
 				{data.change.message}
-			</h2>
-			<Sheet.Root
-				onOpenChange={(value) => {
-					if (!value) {
-						selectOpen = false;
-					}
-				}}
-			>
-				<Sheet.Trigger asChild let:builder>
-					<Button
-						class="absolute right-0 -translate-y-1/2 top-1/2"
-						variant="secondary"
-						builders={[builder]}
-						size="icon"
+			{:else}
+				Create your very first version!
+			{/if}
+		</h2>
+		<Sheet.Root
+			onOpenChange={(value) => {
+				if (!value) {
+					selectOpen = false;
+				}
+			}}
+		>
+			<Sheet.Trigger asChild let:builder>
+				<Button
+					class="absolute right-0 -translate-y-1/2 top-1/2"
+					variant="secondary"
+					builders={[builder]}
+					size="icon"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="lucide lucide-plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							class="lucide lucide-plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg
-						>
-					</Button>
-				</Sheet.Trigger>
-				<Sheet.Content side="right">
-					<Sheet.Header>
-						<Sheet.Title>New Change</Sheet.Title>
-						<Sheet.Description>Save your idea with a clear message</Sheet.Description>
-					</Sheet.Header>
-					<form method="POST" use:createChangeForm.enhance>
-						<FormField form={createChangeForm} name="context">
-							<FormControl let:attrs>
-								<FormLabel>Current team</FormLabel>
-								<Textarea
-									{...attrs}
-									placeholder="Submit First Version!"
-									class="resize-none"
-									bind:value={$createChangeFormData.context}
-									on:change={checkEdited}
-								/>
-								<FormDescription>Update the paste</FormDescription>
-							</FormControl>
-							<FormFieldErrors />
-						</FormField>
-						<FormField form={createChangeForm} name="message">
-							<FormControl let:attrs>
-								<FormLabel>Message</FormLabel>
-								<Input
-									{...attrs}
-									placeholder="Leave some message!"
-									bind:value={$createChangeFormData.message}
-								/>
-								<FormDescription>Describe why you update the team</FormDescription>
-							</FormControl>
-							<FormFieldErrors />
-						</FormField>
+				</Button>
+			</Sheet.Trigger>
+			<Sheet.Content side="right">
+				<Sheet.Header>
+					<Sheet.Title>New Change</Sheet.Title>
+					<Sheet.Description>Save your idea with a clear message</Sheet.Description>
+				</Sheet.Header>
+				<form method="POST" use:createChangeForm.enhance>
+					<FormField form={createChangeForm} name="context">
+						<FormControl let:attrs>
+							<FormLabel>Current team</FormLabel>
+							<Textarea
+								{...attrs}
+								placeholder="Submit First Version!"
+								class="resize-none"
+								bind:value={$createChangeFormData.context}
+								on:change={checkEdited}
+							/>
+							<FormDescription>Update the paste</FormDescription>
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
+					<FormField form={createChangeForm} name="message">
+						<FormControl let:attrs>
+							<FormLabel>Message</FormLabel>
+							<Input
+								{...attrs}
+								placeholder="Leave some message!"
+								bind:value={$createChangeFormData.message}
+							/>
+							<FormDescription>Describe why you update the team</FormDescription>
+						</FormControl>
+						<FormFieldErrors />
+					</FormField>
 
-						<Sheet.Footer>
-							<Sheet.Close asChild let:builder>
-								<Button disabled={!edited} builders={[builder]} on:click={createChangeForm.submit}
-									>Create</Button
-								>
-							</Sheet.Close>
-						</Sheet.Footer>
-					</form>
-				</Sheet.Content>
-			</Sheet.Root>
-		</div>
-		<Textarea disabled value={data.change.context} />
-	{/if}
+					<Sheet.Footer>
+						<Sheet.Close asChild let:builder>
+							<Button disabled={!edited} builders={[builder]} on:click={createChangeForm.submit}
+								>Create</Button
+							>
+						</Sheet.Close>
+					</Sheet.Footer>
+				</form>
+			</Sheet.Content>
+		</Sheet.Root>
+	</div>
+	<Textarea disabled value={data.change?.context ?? ''} />
 {/if}

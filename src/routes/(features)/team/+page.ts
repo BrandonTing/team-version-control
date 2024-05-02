@@ -28,16 +28,18 @@ export async function load({url}) {
 	}
 	const getBranchInfo = Effect.tryPromise({
 		try: async () => {
-			
 			const title = eitherTitle.right
 			const team = await getTeam(title);
 			const branchTitle = url.searchParams.get('branch')
 			const changeId = url.searchParams.get('change')
-			if (!branchTitle || !changeId) {
+			if (!branchTitle) {
 				const query = new URLSearchParams(url.searchParams.toString());
 				const branch = team.branches.find((val) => val.title === team.current_branch_title);
+				const currentChangeId = branch?.current_change_id
+				if(!changeId && currentChangeId) {
+					query.set('change', currentChangeId);
+				}
 				query.set('branch', team.current_branch_title);
-				query.set('change', branch?.current_change_id ?? '');
 				throw new RedirectError(`/team?${query.toString()}`)
 			}
 			
