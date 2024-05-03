@@ -6,6 +6,7 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import Separator from '@/components/ui/separator/separator.svelte';
+	import H3 from '@/components/ui/typography/h3.svelte';
 
 	import { createBranch, createChange } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
@@ -119,6 +120,7 @@
 	</Breadcrumb.List>
 </Breadcrumb.Root>
 
+<H3 content="Description"></H3>
 <p class="text-sm text-muted-foreground">{data.team.team.description}</p>
 
 <div>
@@ -207,15 +209,7 @@
 		{data.branch.description}
 	</p>
 	<div class="relative">
-		<h2
-			class="pb-2 text-3xl font-semibold tracking-tight transition-colors border-b scroll-m-20 first:mt-0"
-		>
-			{#if data.change}
-				{data.change.message}
-			{:else}
-				Create your very first version!
-			{/if}
-		</h2>
+		<H3 content={data.change?.message ?? 'Create your very first version!'}></H3>
 		<Sheet.Root
 			onOpenChange={(value) => {
 				if (!value) {
@@ -244,19 +238,19 @@
 					>
 				</Button>
 			</Sheet.Trigger>
-			<Sheet.Content side="right">
+			<Sheet.Content side="right" class="flex flex-col">
 				<Sheet.Header>
 					<Sheet.Title>New Change</Sheet.Title>
 					<Sheet.Description>Save your idea with a clear message</Sheet.Description>
 				</Sheet.Header>
-				<form method="POST" use:createChangeForm.enhance>
-					<FormField form={createChangeForm} name="context">
+				<form method="POST" use:createChangeForm.enhance class="flex flex-col flex-1">
+					<FormField form={createChangeForm} name="context" class="flex flex-col flex-1">
 						<FormControl let:attrs>
 							<FormLabel>Current team</FormLabel>
 							<Textarea
 								{...attrs}
 								placeholder="Submit First Version!"
-								class="resize-none"
+								class="flex-1 "
 								bind:value={$createChangeFormData.context}
 								on:change={checkEdited}
 							/>
@@ -288,5 +282,5 @@
 			</Sheet.Content>
 		</Sheet.Root>
 	</div>
-	<Textarea disabled value={data.change?.context ?? ''} />
+	<Textarea class="flex-1" disabled value={data.change?.context ?? ''} />
 {/if}

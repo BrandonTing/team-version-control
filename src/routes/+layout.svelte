@@ -9,7 +9,7 @@
 </svelte:head>
 
 <div class="flex flex-col w-full min-h-screen">
-	<main class="box-border flex flex-col self-center flex-grow flex-shrink w-full max-w-5xl p-4">
+	<main class="box-border flex flex-col self-center flex-1 w-full max-w-5xl p-4">
 		<slot />
 	</main>
 	<Footer />

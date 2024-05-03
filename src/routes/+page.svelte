@@ -35,7 +35,7 @@
 	{:then teams}
 		{#if teams.length === 0}
 			<Root variant="destructive">
-				<Title>Heads up!</Title>
+				<Title>Empty Teambuilder!</Title>
 				<Description>You can add team by click the New button.</Description>
 			</Root>
 		{:else}
