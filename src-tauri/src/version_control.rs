@@ -81,7 +81,12 @@ pub fn get_teams(app_handle: tauri::AppHandle) -> Result<Vec<Team>, String> {
 #[specta::specta] // <-- This bit here
 pub fn get_team(app_handle: tauri::AppHandle, key: String) -> Result<TeamDetail, String> {
     let store = get_store(app_handle);
-    match serde_json::from_value::<TeamDetail>(store.get(key).unwrap().clone()) {
+    let team_raw_value = store.get(key);
+    let team_val = match team_raw_value {
+        Some(v) => v,
+        None => return Err("target team doesn't exist".to_string()),
+    };
+    match serde_json::from_value::<TeamDetail>(team_val.clone()) {
         Ok(v) => Ok(v),
         Err(e) => {
             println!("{:?}", e);
