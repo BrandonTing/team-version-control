@@ -38,6 +38,10 @@ export function getChangeHistory(teamTitle: string, branchTitle: string) {
     return invoke()<Change[]>("get_change_history", { teamTitle,branchTitle })
 }
 
+export function upload(title: string, paste: string) {
+    return invoke()<string>("upload", { title,paste })
+}
+
 export type TeamDetail = { team: Team; branches: Branch[]; current_branch_title: string }
 export type Team = { title: string; description: string; created_at: number }
 export type Branch = { title: string; description: string; history: Change[]; current_change_id: string }

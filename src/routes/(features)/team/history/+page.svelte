@@ -2,9 +2,9 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Table from '$lib/components/ui/table';
+	import UploadPokePasteButton from '@/components/pokePaste/uploadPokePasteButton.svelte';
 	import { buttonVariants } from '@/components/ui/button/index.js';
 	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
-
 	const { data } = $props();
 	const { teamTitle, branchTitle } = data;
 	console.log(data.history);
@@ -58,9 +58,12 @@
 							<ScrollArea class="flex-1">
 								<p class="whitespace-pre-line">{change.context}</p>
 							</ScrollArea>
-							<div>
-								<!-- TODO copy button -->
-								<!-- export button  -->
+							<div class="flex justify-end">
+								<UploadPokePasteButton
+									variant="outline"
+									title={teamTitle}
+									context={change.context}
+								/>
 							</div>
 						</Dialog.Content>
 					</Dialog.Root>

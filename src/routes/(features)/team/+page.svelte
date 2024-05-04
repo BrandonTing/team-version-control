@@ -82,6 +82,7 @@
 					if (!data.branchTitle) {
 						throw new InvalidBranchTitleError();
 					}
+					// const modifiedContext = $createChangeFormData.context.replaceAll("")
 					const changeId = await createChange(
 						title,
 						data.branchTitle,

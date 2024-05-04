@@ -3,8 +3,10 @@
 mod store;
 mod version_control;
 use version_control::{
-    create_branch, create_change, create_team, get_team, get_teams, reset_store, get_change_history
+    create_branch, create_change, create_team, get_change_history, get_team, get_teams, reset_store,
 };
+mod upload;
+use upload::upload;
 
 fn main() {
     let _ = fix_path_env::fix(); // <---- Add this
@@ -18,7 +20,8 @@ fn main() {
             create_branch,
             create_change,
             reset_store,
-            get_change_history
+            get_change_history,
+            upload
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -39,7 +42,8 @@ fn export_bindings() {
             create_branch,
             create_change,
             reset_store,
-            get_change_history
+            get_change_history,
+            upload
         ],
         "../src/lib/bindings.ts",
     ) {
