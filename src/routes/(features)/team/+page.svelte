@@ -5,12 +5,11 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
-	import Separator from '@/components/ui/separator/separator.svelte';
-	import H3 from '@/components/ui/typography/h3.svelte';
-
 	import { createBranch, createChange } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
+	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
+	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 	import {
 		FormControl,
 		FormDescription,
@@ -21,9 +20,13 @@
 	import { Input } from '@/components/ui/input';
 	import Label from '@/components/ui/label/label.svelte';
 	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
+	import Separator from '@/components/ui/separator/separator.svelte';
 	import { Textarea } from '@/components/ui/textarea';
+	import H3 from '@/components/ui/typography/h3.svelte';
 	import { InvokeTauriError } from '@/errors';
+	import { cn } from '@/utils';
 	import { Effect } from 'effect';
+	import { Ellipsis } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
@@ -106,6 +109,8 @@
 		invalidateAll: false
 	});
 	const { form: createChangeFormData } = createChangeForm;
+
+	let createChangeSheetOpen = $state(false);
 </script>
 
 <Breadcrumb.Root>
@@ -120,7 +125,7 @@
 	</Breadcrumb.List>
 </Breadcrumb.Root>
 
-<H3 content="Description"></H3>
+<H3 content="Team Description"></H3>
 <p class="text-sm text-muted-foreground">{data.team.team.description}</p>
 
 <div>
@@ -141,7 +146,7 @@
 			<Select.Value placeholder="Select a Branch" />
 		</Select.Trigger>
 		<Select.Content>
-			<ScrollArea class="h-40">
+			<ScrollArea class="max-h-40">
 				{#each data.team.branches as branch}
 					<Select.Item value={branch.title} label={branch.title}>{branch.title}</Select.Item>
 				{/each}
@@ -205,82 +210,92 @@
 </div>
 
 {#if data.branch}
+	<H3 content="Branch Description"></H3>
 	<p class="text-sm text-muted-foreground">
-		{data.branch.description}
+		{data.branch.description || '(empty)'}
 	</p>
 	<div class="relative">
-		<H3 content={data.change?.message ?? 'Create your very first version!'}></H3>
-		<Sheet.Root
-			onOpenChange={(value) => {
-				if (!value) {
-					selectOpen = false;
-				}
-			}}
-		>
-			<Sheet.Trigger asChild let:builder>
-				<Button
-					class="absolute right-0 -translate-y-1/2 top-1/2"
-					variant="secondary"
-					builders={[builder]}
-					size="icon"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="lucide lucide-plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg
+		<H3 content={`Latest message: ${data.change?.message}` ?? 'Create your very first version!'}
+		></H3>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger
+				id="more_options_dropdown"
+				class={cn(
+					buttonVariants({ variant: 'secondary', size: 'icon' }),
+					'absolute right-0 -translate-y-1/2 top-1/2'
+				)}
+			>
+				<Ellipsis class="size-4" />
+				<span class="sr-only">More</span>
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end">
+				<DropdownMenu.Item>
+					<Button variant="ghost" on:click={() => (createChangeSheetOpen = true)}>New Change</Button
 					>
-				</Button>
-			</Sheet.Trigger>
-			<Sheet.Content side="right" class="flex flex-col">
-				<Sheet.Header>
-					<Sheet.Title>New Change</Sheet.Title>
-					<Sheet.Description>Save your idea with a clear message</Sheet.Description>
-				</Sheet.Header>
-				<form method="POST" use:createChangeForm.enhance class="flex flex-col flex-1">
-					<FormField form={createChangeForm} name="context" class="flex flex-col flex-1">
-						<FormControl let:attrs>
-							<FormLabel>Current team</FormLabel>
-							<Textarea
-								{...attrs}
-								placeholder="Submit First Version!"
-								class="flex-1 "
-								bind:value={$createChangeFormData.context}
-								on:change={checkEdited}
-							/>
-							<FormDescription>Update the paste</FormDescription>
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
-					<FormField form={createChangeForm} name="message">
-						<FormControl let:attrs>
-							<FormLabel>Message</FormLabel>
-							<Input
-								{...attrs}
-								placeholder="Leave some message!"
-								bind:value={$createChangeFormData.message}
-							/>
-							<FormDescription>Describe why you update the team</FormDescription>
-						</FormControl>
-						<FormFieldErrors />
-					</FormField>
-
-					<Sheet.Footer>
-						<Sheet.Close asChild let:builder>
-							<Button disabled={!edited} builders={[builder]} on:click={createChangeForm.submit}
-								>Create</Button
-							>
-						</Sheet.Close>
-					</Sheet.Footer>
-				</form>
-			</Sheet.Content>
-		</Sheet.Root>
+				</DropdownMenu.Item>
+				<DropdownMenu.Item>
+					<Button
+						variant="ghost"
+						on:click={() => goto(`/team/history?team=${title}&branch=${branchParam().value}`)}
+						>View History</Button
+					>
+				</DropdownMenu.Item>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
 	</div>
 	<Textarea class="flex-1" disabled value={data.change?.context ?? ''} />
+	<Sheet.Root
+		bind:open={createChangeSheetOpen}
+		onOpenChange={(value) => {
+			if (!value) {
+				selectOpen = false;
+			}
+		}}
+	>
+		<Sheet.Trigger asChild let:builder>
+			<Button builders={[builder]} variant="ghost">New Change</Button>
+		</Sheet.Trigger>
+		<Sheet.Content side="right" class="flex flex-col">
+			<Sheet.Header>
+				<Sheet.Title>New Change</Sheet.Title>
+				<Sheet.Description>Save your idea with a clear message</Sheet.Description>
+			</Sheet.Header>
+			<form method="POST" use:createChangeForm.enhance class="flex flex-col flex-1">
+				<FormField form={createChangeForm} name="context" class="flex flex-col flex-1">
+					<FormControl let:attrs>
+						<FormLabel>Current team</FormLabel>
+						<Textarea
+							{...attrs}
+							placeholder="Submit First Version!"
+							class="flex-1 "
+							bind:value={$createChangeFormData.context}
+							on:change={checkEdited}
+						/>
+						<FormDescription>Update the paste</FormDescription>
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
+				<FormField form={createChangeForm} name="message">
+					<FormControl let:attrs>
+						<FormLabel>Message</FormLabel>
+						<Input
+							{...attrs}
+							placeholder="Leave some message!"
+							bind:value={$createChangeFormData.message}
+						/>
+						<FormDescription>Describe why you update the team</FormDescription>
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
+
+				<Sheet.Footer>
+					<Sheet.Close asChild let:builder>
+						<Button disabled={!edited} builders={[builder]} on:click={createChangeForm.submit}
+							>Create</Button
+						>
+					</Sheet.Close>
+				</Sheet.Footer>
+			</form>
+		</Sheet.Content>
+	</Sheet.Root>
 {/if}

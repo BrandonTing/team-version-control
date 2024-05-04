@@ -32,8 +32,8 @@ export async function load({url}) {
 			const team = await getTeam(title);
 			const branchTitle = url.searchParams.get('branch')
 			const changeId = url.searchParams.get('change')
+			const query = new URLSearchParams(url.searchParams.toString());
 			if (!branchTitle) {
-				const query = new URLSearchParams(url.searchParams.toString());
 				const branch = team.branches.find((val) => val.title === team.current_branch_title);
 				const currentChangeId = branch?.current_change_id
 				if(!changeId && currentChangeId) {
@@ -44,6 +44,11 @@ export async function load({url}) {
 			}
 			
 			const branch = team.branches.find((val) => val.title === branchTitle);
+			const currentChangeId = branch?.current_change_id
+			if(!changeId && currentChangeId) {
+				query.set('change', currentChangeId);
+				throw new RedirectError(`/team?${query.toString()}`)
+			}
 			const change = branch?.history.find((val) => val.id === changeId);	
 			return {
 				team,

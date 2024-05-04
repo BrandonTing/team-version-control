@@ -38,11 +38,11 @@
   },
   "type": "module",
   "dependencies": {
-    "bits-ui": "^0.21.2",
+    "bits-ui": "^0.21.7",
     "clsx": "^2.1.0",
     "effect": "^3.0.6",
     "formsnap": "^1.0.0",
-    "lucide-svelte": "^0.367.0",
+    "lucide-svelte": "^0.378.0",
     "sveltekit-superforms": "^2.11.0",
     "tailwind-merge": "^2.2.2",
     "tailwind-variants": "^0.2.1",
