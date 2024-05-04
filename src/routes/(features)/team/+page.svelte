@@ -6,6 +6,7 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { createBranch, createChange } from '@/bindings';
+	import UploadPokePasteButton from '@/components/pokePaste/uploadPokePasteButton.svelte';
 	import { Description, Root, Title } from '@/components/ui/alert';
 	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
@@ -32,6 +33,7 @@
 	import type { PageData } from './$types';
 	import { InvalidBranchTitleError } from './error';
 	import { createBranchFormSchema, createChangeFormSchema } from './schema';
+
 	const { data }: { data: PageData } = $props();
 	const { title } = data;
 
@@ -238,6 +240,11 @@
 						>View History</Button
 					>
 				</DropdownMenu.Item>
+				{#if data.change}
+					<DropdownMenu.Item>
+						<UploadPokePasteButton variant="ghost" {title} context={data.change.context} />
+					</DropdownMenu.Item>
+				{/if}
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</div>
@@ -250,9 +257,6 @@
 			}
 		}}
 	>
-		<Sheet.Trigger asChild let:builder>
-			<Button builders={[builder]} variant="ghost">New Change</Button>
-		</Sheet.Trigger>
 		<Sheet.Content side="right" class="flex flex-col">
 			<Sheet.Header>
 				<Sheet.Title>New Change</Sheet.Title>
