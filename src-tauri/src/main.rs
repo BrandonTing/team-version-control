@@ -3,7 +3,7 @@
 mod store;
 mod version_control;
 use version_control::{
-    create_branch, create_change, create_team, get_team, get_teams, reset_store,
+    create_branch, create_change, create_team, get_team, get_teams, reset_store, get_change_history
 };
 
 fn main() {
@@ -17,7 +17,8 @@ fn main() {
             create_team,
             create_branch,
             create_change,
-            reset_store
+            reset_store,
+            get_change_history
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -37,7 +38,8 @@ fn export_bindings() {
             create_team,
             create_branch,
             create_change,
-            reset_store
+            reset_store,
+            get_change_history
         ],
         "../src/lib/bindings.ts",
     ) {

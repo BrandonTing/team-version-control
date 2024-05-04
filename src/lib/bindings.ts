@@ -34,6 +34,10 @@ export function resetStore() {
     return invoke()<null>("reset_store")
 }
 
+export function getChangeHistory(teamTitle: string, branchTitle: string) {
+    return invoke()<Change[]>("get_change_history", { teamTitle,branchTitle })
+}
+
 export type TeamDetail = { team: Team; branches: Branch[]; current_branch_title: string }
 export type Team = { title: string; description: string; created_at: number }
 export type Branch = { title: string; description: string; history: Change[]; current_change_id: string }

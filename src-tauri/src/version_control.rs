@@ -239,3 +239,31 @@ pub fn create_change(
 
     return Ok(id);
 }
+
+#[tauri::command]
+#[specta::specta] // <-- This bit here
+pub fn get_change_history(
+    app_handle: tauri::AppHandle,
+    team_title: String,
+    branch_title: String,
+) -> Result<Vec<Change>, String> {
+    let store = get_store(app_handle);
+    let detail = match store.get(&team_title) {
+        None => {
+            return Err("Target team doesn't exist.".to_string());
+        }
+        Some(v) => match from_value::<TeamDetail>(v.clone()) {
+            Err(_) => {
+                return Err("Failed to parse team.".to_string());
+            }
+            Ok(t) => t,
+        },
+    };
+    let branch = match detail.branches.iter().find(|x| x.title == branch_title) {
+        None => {
+            return Err("Failed to find target branch.".to_string());
+        }
+        Some(branch) => branch,
+    };
+    return Ok(branch.history.clone());
+}

@@ -19,7 +19,7 @@ export async function load({url}) {
 			return decodeURIComponent(raw)
 		},
 		catch: () => {
-			return new RedirectError("/")
+			return new RedirectError({path: "/"})
 		}
 	})
 	const eitherTitle = checkTitle.pipe(Effect.either, Effect.runSync)
@@ -40,14 +40,14 @@ export async function load({url}) {
 					query.set('change', currentChangeId);
 				}
 				query.set('branch', team.current_branch_title);
-				throw new RedirectError(`/team?${query.toString()}`)
+				throw new RedirectError({path:`/team?${query.toString()}`})
 			}
 			
 			const branch = team.branches.find((val) => val.title === branchTitle);
 			const currentChangeId = branch?.current_change_id
 			if(!changeId && currentChangeId) {
 				query.set('change', currentChangeId);
-				throw new RedirectError(`/team?${query.toString()}`)
+				throw new RedirectError({path: `/team?${query.toString()}`})
 			}
 			const change = branch?.history.find((val) => val.id === changeId);	
 			return {

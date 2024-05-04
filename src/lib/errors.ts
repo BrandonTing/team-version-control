@@ -1,7 +1,6 @@
-export class RedirectError {
-	readonly _tag = "RedirectError"
-	
-	constructor(public path: string) {}
+import { Data } from "effect"
+
+export class RedirectError extends Data.TaggedError("RedirectError")<{path: string}> {
 }
 
 export class InvokeTauriError {
