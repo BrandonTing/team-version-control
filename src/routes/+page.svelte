@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, preloadData } from '$app/navigation';
+	import { preloadData } from '$app/navigation';
 	import * as Table from '$lib/components/ui/table';
 	import { resetStore } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
@@ -18,9 +18,7 @@
 		<Input placeholder="Find a team..." class="w-64" bind:value={searchKw} />
 		<Button
 			variant="secondary"
-			on:click={() => {
-				goto('./create');
-			}}
+			href="/create"
 			on:mouseenter={async () => await preloadData('/create')}>New</Button
 		>
 		<Button
@@ -58,9 +56,7 @@
 								<Button
 									variant="link"
 									class="px-0"
-									on:click={() => {
-										goto(`./team?title=${encodeURIComponent(team.title)}`);
-									}}
+									href={`./team?title=${encodeURIComponent(team.title)}`}
 								>
 									{team.title}
 								</Button>

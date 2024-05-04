@@ -234,9 +234,7 @@
 					>
 				</DropdownMenu.Item>
 				<DropdownMenu.Item>
-					<Button
-						variant="ghost"
-						on:click={() => goto(`/team/history?team=${title}&branch=${branchParam().value}`)}
+					<Button variant="ghost" href={`/team/history?team=${title}&branch=${branchParam().value}`}
 						>View History</Button
 					>
 				</DropdownMenu.Item>
