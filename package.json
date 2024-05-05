@@ -39,6 +39,7 @@
   "type": "module",
   "dependencies": {
     "@effect/platform": "^0.52.2",
+    "autoprefixer": "^10.4.19",
     "bits-ui": "^0.21.7",
     "clsx": "^2.1.0",
     "effect": "^3.0.6",
