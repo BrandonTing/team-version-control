@@ -128,6 +128,29 @@ pub fn create_team(
 
 #[tauri::command]
 #[specta::specta] // <-- This bit here
+pub fn delete_team(app_handle: tauri::AppHandle, title: String) -> Result<(), String> {
+    let mut store = get_store(app_handle);
+    match store.delete(&title) {
+        Ok(_) => println!("Successfully deleted"),
+        Err(e) => {
+            println!("{}", e);
+            return Err(format!("Failed to delete team: {}", &title));
+        }
+    };
+    match store.save() {
+        Err(e) => {
+            println!("{:?}", e);
+            return Err("Failed to save deletion".to_string());
+        }
+        _ => {
+            println!("deletion saved");
+        }
+    };
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta] // <-- This bit here
 pub fn create_branch(
     app_handle: tauri::AppHandle,
     team_title: String,

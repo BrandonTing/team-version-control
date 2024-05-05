@@ -3,7 +3,8 @@
 mod store;
 mod version_control;
 use version_control::{
-    create_branch, create_change, create_team, get_change_history, get_team, get_teams, reset_store,
+    create_branch, create_change, create_team, delete_team, get_change_history, get_team,
+    get_teams, reset_store,
 };
 mod upload;
 use upload::upload;
@@ -17,6 +18,7 @@ fn main() {
             get_teams,
             get_team,
             create_team,
+            delete_team,
             create_branch,
             create_change,
             reset_store,
@@ -43,7 +45,8 @@ fn export_bindings() {
             create_change,
             reset_store,
             get_change_history,
-            upload
+            upload,
+            delete_team
         ],
         "../src/lib/bindings.ts",
     ) {

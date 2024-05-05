@@ -42,6 +42,10 @@ export function upload(title: string, paste: string) {
     return invoke()<string>("upload", { title,paste })
 }
 
+export function deleteTeam(title: string) {
+    return invoke()<null>("delete_team", { title })
+}
+
 export type TeamDetail = { team: Team; branches: Branch[]; current_branch_title: string }
 export type Team = { title: string; description: string; created_at: number }
 export type Branch = { title: string; description: string; history: Change[]; current_change_id: string }
