@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll, preloadData } from '$app/navigation';
+	import { goto, invalidateAll, preloadData } from '$app/navigation';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Table from '$lib/components/ui/table';
 	import { deleteTeam, resetStore } from '@/bindings';
@@ -7,14 +7,44 @@
 	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Input } from '@/components/ui/input';
+	import { InvokeTauriError, RedirectError } from '@/errors';
+	import { Console, Effect, Either } from 'effect';
 	import type { PageData } from './$types';
 	const { data }: { data: PageData } = $props();
 
 	let searchKw = $state('');
 
 	async function deleteTeamHandler(title: string) {
-		await deleteTeam(title);
-		await invalidateAll();
+		const possibleErrors = await Effect.gen(function* () {
+			yield* Effect.tryPromise({
+				try: async () => {
+					await deleteTeam(title);
+				},
+				catch: (e) => {
+					return new InvokeTauriError('deleteTeam', e as string);
+				}
+			});
+			yield* Effect.tryPromise({
+				try: async () => {
+					await invalidateAll();
+				},
+				catch: (e) => {
+					return new RedirectError({ path: '/' });
+				}
+			});
+		}).pipe(
+			Effect.catchTag('InvokeTauriError', (e) => {
+				Effect.runSync(Console.log(e.message));
+				return Effect.succeed(undefined);
+			}),
+			Effect.either,
+			Effect.runPromise
+		);
+		if (Either.isLeft(possibleErrors)) {
+			if (possibleErrors.left instanceof RedirectError) {
+				await goto(possibleErrors.left.path);
+			}
+		}
 	}
 </script>
 
