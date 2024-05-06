@@ -1,24 +1,20 @@
 <script lang="ts">
-	import { preloadData } from '$app/navigation';
+	import { invalidateAll, preloadData } from '$app/navigation';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Table from '$lib/components/ui/table';
-	import { resetStore } from '@/bindings';
+	import { deleteTeam, resetStore } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
 	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Input } from '@/components/ui/input';
 	import type { PageData } from './$types';
-
 	const { data }: { data: PageData } = $props();
-	const { teamsRequest } = data;
 
 	let searchKw = $state('');
 
-	async function deleteTeam(title: string) {
-		console.log('wefwefew');
-		// FIXME a infinite loop here
+	async function deleteTeamHandler(title: string) {
 		await deleteTeam(title);
-		// TODO invalidate path
+		await invalidateAll();
 	}
 </script>
 
@@ -32,7 +28,7 @@
 		>
 		<Button variant="outline" on:click={resetStore}>Remove all teams</Button>
 	</div>
-	{#await teamsRequest}
+	{#await data.teamsRequest}
 		<p>loading...</p>
 	{:then teams}
 		{#if teams.length === 0}
@@ -85,7 +81,7 @@
 											<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 											<AlertDialog.Action
 												class={buttonVariants({ variant: 'destructive' })}
-												on:click={() => deleteTeam(team.title)}
+												on:click={() => deleteTeamHandler(team.title)}
 											>
 												Confirm
 											</AlertDialog.Action>
