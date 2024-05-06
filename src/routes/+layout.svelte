@@ -1,5 +1,5 @@
 <script>
-	import Footer from './footer.svelte';
+	import github from '$lib/images/github.svg';
 	import './styles.css';
 </script>
 
@@ -12,5 +12,12 @@
 	<main class="box-border flex flex-col self-center flex-1 w-full max-w-5xl p-4">
 		<slot />
 	</main>
-	<Footer />
+
+	<footer class="flex justify-end p-4">
+		<div class="size-12">
+			<a href="https://github.com/BrandonTing/team-version-control">
+				<img src={github} alt="GitHub" />
+			</a>
+		</div>
+	</footer>
 </div>
