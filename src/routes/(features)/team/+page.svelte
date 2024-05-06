@@ -218,7 +218,10 @@
 		{data.branch.description || '(empty)'}
 	</p>
 	<div class="relative">
-		<H3 content={`Latest message: ${data.change?.message}` ?? 'Create your very first version!'}
+		<H3
+			content={data.change
+				? `Latest message: ${data.change.message}`
+				: 'Create your very first version!'}
 		></H3>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
