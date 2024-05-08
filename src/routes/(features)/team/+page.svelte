@@ -24,6 +24,7 @@
 	import Separator from '@/components/ui/separator/separator.svelte';
 	import { Textarea } from '@/components/ui/textarea';
 	import H3 from '@/components/ui/typography/h3.svelte';
+	import H4 from '@/components/ui/typography/h4.svelte';
 	import { InvokeTauriError } from '@/errors';
 	import { cn } from '@/utils';
 	import { Effect } from 'effect';
@@ -31,7 +32,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
-	import { InvalidBranchTitleError } from './error';
+	import { InvalidBranchTitleError } from './errors';
 	import { createBranchFormSchema, createChangeFormSchema } from './schema';
 
 	const { data }: { data: PageData } = $props();
@@ -213,13 +214,16 @@
 </div>
 
 {#if data.branch}
-	<H3 content="Branch Description"></H3>
+	<H4 content="Branch Description"></H4>
 	<p class="text-sm text-muted-foreground">
 		{data.branch.description || '(empty)'}
 	</p>
 	<div class="relative">
-		<H3 content={`Latest message: ${data.change?.message}` ?? 'Create your very first version!'}
-		></H3>
+		<H4
+			content={data.change
+				? `Latest message: ${data.change.message}`
+				: 'Create your very first version!'}
+		></H4>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
 				id="more_options_dropdown"
@@ -233,17 +237,25 @@
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content align="end">
 				<DropdownMenu.Item>
-					<Button variant="ghost" on:click={() => (createChangeSheetOpen = true)}>New Change</Button
+					<Button variant="ghost" class="w-full" on:click={() => (createChangeSheetOpen = true)}
+						>New Change</Button
 					>
 				</DropdownMenu.Item>
 				<DropdownMenu.Item>
-					<Button variant="ghost" href={`/team/history?team=${title}&branch=${branchParam().value}`}
-						>View History</Button
+					<Button
+						variant="ghost"
+						class="w-full"
+						href={`/team/history?team=${title}&branch=${branchParam().value}`}>View History</Button
 					>
 				</DropdownMenu.Item>
 				{#if data.change}
 					<DropdownMenu.Item>
-						<UploadPokePasteButton variant="ghost" {title} context={data.change.context} />
+						<UploadPokePasteButton
+							className="w-full"
+							variant="ghost"
+							{title}
+							context={data.change.context}
+						/>
 					</DropdownMenu.Item>
 				{/if}
 			</DropdownMenu.Content>
