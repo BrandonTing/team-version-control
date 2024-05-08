@@ -315,7 +315,7 @@ pub fn create_change(
         message,
         context,
     };
-    branch.history.push(change.clone());
+    branch.history.insert(0, change.clone());
     branch.current_change_id = id.clone();
     match store.insert(team_title, json!(detail)) {
         Err(e) => {

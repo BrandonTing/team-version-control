@@ -17,7 +17,6 @@ export async function load({ url }) {
             try: () => getChangeHistory(teamTitle, branchTitle),
             catch: (e) => new InvokeTauriError("getChangeHistory", e as string)
         })
-
         return {
             history,
             teamTitle,
