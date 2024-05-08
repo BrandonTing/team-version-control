@@ -6,8 +6,7 @@
     "distDir": "../build"
   },
   "package": {
-    "productName": "team-version-control",
-    "version": "0.1.0"
+    "productName": "team-version-control"
   },
   "tauri": {
     "allowlist": {
