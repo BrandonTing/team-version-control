@@ -36,6 +36,7 @@
 	import { createBranchFormSchema, createChangeFormSchema } from './schema';
 
 	const { data }: { data: PageData } = $props();
+	console.log(data);
 	const { title } = data;
 
 	const branchParam = $derived(() => {
@@ -141,6 +142,7 @@
 			if (selected) {
 				let query = new URLSearchParams($page.url.searchParams.toString());
 				query.set('branch', selected.value);
+				query.set('change', '');
 				goto(`?${query.toString()}`);
 			}
 		}}
