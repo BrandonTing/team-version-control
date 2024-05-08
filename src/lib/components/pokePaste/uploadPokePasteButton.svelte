@@ -9,8 +9,14 @@
 	const {
 		title,
 		variant,
-		context
-	}: { title: string; context: string; variant: ComponentProps<Button>['variant'] } = $props();
+		context,
+		className
+	}: {
+		title: string;
+		context: string;
+		variant: ComponentProps<Button>['variant'];
+		className?: ComponentProps<Button>['class'];
+	} = $props();
 
 	async function uploadPaste() {
 		await Effect.tryPromise({
@@ -26,4 +32,4 @@
 	}
 </script>
 
-<Button {variant} on:click={uploadPaste}>Upload to PokePaste</Button>
+<Button {variant} class={className} on:click={uploadPaste}>Upload to PokePaste</Button>

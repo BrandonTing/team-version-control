@@ -128,6 +128,29 @@ pub fn create_team(
 
 #[tauri::command]
 #[specta::specta] // <-- This bit here
+pub fn delete_team(app_handle: tauri::AppHandle, title: String) -> Result<(), String> {
+    let mut store = get_store(app_handle);
+    match store.delete(&title) {
+        Ok(_) => println!("Successfully deleted"),
+        Err(e) => {
+            println!("{}", e);
+            return Err(format!("Failed to delete team: {}", &title));
+        }
+    };
+    match store.save() {
+        Err(e) => {
+            println!("{:?}", e);
+            return Err("Failed to save deletion".to_string());
+        }
+        _ => {
+            println!("deletion saved");
+        }
+    };
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta] // <-- This bit here
 pub fn create_branch(
     app_handle: tauri::AppHandle,
     team_title: String,
@@ -146,12 +169,81 @@ pub fn create_branch(
             Ok(t) => t,
         },
     };
-    let branch = Branch {
-        title: title.to_string(),
-        description: description.to_string(),
-        history: vec![],
-        current_change_id: "".to_string(),
+    match detail.branches.iter().find(|x| x.title == title) {
+        Some(_) => {
+            println!("failed");
+            return Err("Please provide unique title for the branch.".to_string());
+        }
+        None => {
+            let branch = Branch {
+                title: title.to_string(),
+                description: description.to_string(),
+                history: vec![],
+                current_change_id: "".to_string(),
+            };
+            println!("add a branch");
+            detail.branches.push(branch);
+            match store.insert(team_title, json!(detail)) {
+                Err(e) => {
+                    println!("{:?}", e);
+                    return Err("Failed to update branch".to_string());
+                }
+                _ => {
+                    println!("branch inserted");
+                }
+            };
+            match store.save() {
+                Err(e) => {
+                    println!("{:?}", e);
+                    return Err("Failed to save branch update".to_string());
+                }
+                _ => {
+                    println!("branch saved");
+                }
+            };
+        }
     };
+    return Ok(());
+}
+
+#[tauri::command]
+#[specta::specta] // <-- This bit here
+pub fn create_branch_from_change(
+    app_handle: tauri::AppHandle,
+    team_title: String,
+    title: String,
+    description: String,
+    parent_branch_title: String,
+    change_id: String,
+) -> Result<(), String> {
+    let mut store = get_store(app_handle);
+    let mut detail = match store.get(&team_title) {
+        None => {
+            return Err("Target team doesn't exist.".to_string());
+        }
+        Some(v) => match from_value::<TeamDetail>(v.clone()) {
+            Err(_) => {
+                return Err("Failed to parse team.".to_string());
+            }
+            Ok(t) => t,
+        },
+    };
+    let base_change = match detail
+        .branches
+        .iter()
+        .find(|x| x.title == parent_branch_title)
+    {
+        None => {
+            return Err("No target parent branch".to_string());
+        }
+        Some(v) => match v.history.iter().find(|x| x.id == change_id) {
+            Some(v) => v.clone(),
+            None => {
+                return Err("No target branch id".to_string());
+            }
+        },
+    };
+
     match detail.branches.iter().find(|x| x.title == title) {
         Some(_) => {
             println!("failed");
@@ -159,6 +251,13 @@ pub fn create_branch(
         }
         None => {
             println!("add a branch");
+
+            let branch = Branch {
+                title: title.to_string(),
+                description: description.to_string(),
+                history: vec![base_change.clone()],
+                current_change_id: base_change.id,
+            };
             detail.branches.push(branch);
             match store.insert(team_title, json!(detail)) {
                 Err(e) => {
@@ -216,7 +315,7 @@ pub fn create_change(
         message,
         context,
     };
-    branch.history.push(change.clone());
+    branch.history.insert(0, change.clone());
     branch.current_change_id = id.clone();
     match store.insert(team_title, json!(detail)) {
         Err(e) => {

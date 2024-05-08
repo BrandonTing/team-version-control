@@ -1,16 +1,51 @@
 <script lang="ts">
-	import { preloadData } from '$app/navigation';
+	import { goto, invalidateAll, preloadData } from '$app/navigation';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Table from '$lib/components/ui/table';
-	import { resetStore } from '@/bindings';
+	import { deleteTeam, resetStore } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
+	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Input } from '@/components/ui/input';
+	import { InvokeTauriError, RedirectError } from '@/errors';
+	import { Console, Effect, Either } from 'effect';
 	import type { PageData } from './$types';
-
 	const { data }: { data: PageData } = $props();
-	const { teamsRequest } = data;
 
 	let searchKw = $state('');
+
+	async function deleteTeamHandler(title: string) {
+		const possibleErrors = await Effect.gen(function* () {
+			yield* Effect.tryPromise({
+				try: async () => {
+					await deleteTeam(title);
+				},
+				catch: (e) => {
+					return new InvokeTauriError('deleteTeam', e as string);
+				}
+			});
+			yield* Effect.tryPromise({
+				try: async () => {
+					await invalidateAll();
+				},
+				catch: (e) => {
+					return new RedirectError({ path: '/' });
+				}
+			});
+		}).pipe(
+			Effect.catchTag('InvokeTauriError', (e) => {
+				Effect.runSync(Console.log(e.message));
+				return Effect.succeed(undefined);
+			}),
+			Effect.either,
+			Effect.runPromise
+		);
+		if (Either.isLeft(possibleErrors)) {
+			if (possibleErrors.left instanceof RedirectError) {
+				await goto(possibleErrors.left.path);
+			}
+		}
+	}
 </script>
 
 <section class="flex flex-col w-full gap-2">
@@ -21,14 +56,9 @@
 			href="/create"
 			on:mouseenter={async () => await preloadData('/create')}>New</Button
 		>
-		<Button
-			variant="outline"
-			on:click={async () => {
-				await resetStore();
-			}}>Clear teams</Button
-		>
+		<Button variant="outline" on:click={resetStore}>Remove all teams</Button>
 	</div>
-	{#await teamsRequest}
+	{#await data.teamsRequest}
 		<p>loading...</p>
 	{:then teams}
 		{#if teams.length === 0}
@@ -45,6 +75,7 @@
 						<Table.Head class="w-[100px]">Title</Table.Head>
 						<Table.Head>Description</Table.Head>
 						<Table.Head>Created At</Table.Head>
+						<Table.Head></Table.Head>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
@@ -62,7 +93,32 @@
 								</Button>
 							</Table.Cell>
 							<Table.Cell>{team.description}</Table.Cell>
-							<Table.Cell>{new Date(team.created_at * 1000)}</Table.Cell>
+							<Table.Cell>{new Date(team.created_at * 1000).toLocaleString()}</Table.Cell>
+							<Table.Cell>
+								<AlertDialog.Root>
+									<AlertDialog.Trigger>
+										<Button variant="destructive">Delete</Button>
+									</AlertDialog.Trigger>
+									<AlertDialog.Content>
+										<AlertDialog.Header>
+											<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+											<AlertDialog.Description>
+												This action cannot be undone. This will permanently delete your teams,
+												branches and all changes.
+											</AlertDialog.Description>
+										</AlertDialog.Header>
+										<AlertDialog.Footer>
+											<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+											<AlertDialog.Action
+												class={buttonVariants({ variant: 'destructive' })}
+												on:click={() => deleteTeamHandler(team.title)}
+											>
+												Confirm
+											</AlertDialog.Action>
+										</AlertDialog.Footer>
+									</AlertDialog.Content>
+								</AlertDialog.Root>
+							</Table.Cell>
 						</Table.Row>
 					{/each}
 				</Table.Body>
