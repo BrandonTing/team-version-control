@@ -169,7 +169,11 @@ pub fn create_branch(
             Ok(t) => t,
         },
     };
-    match detail.branches.iter().find(|x| x.title == title) {
+    match detail
+        .branches
+        .iter()
+        .find(|x| x.title.trim() == title.trim())
+    {
         Some(_) => {
             println!("failed");
             return Err("Please provide unique title for the branch.".to_string());
@@ -244,7 +248,11 @@ pub fn create_branch_from_change(
         },
     };
 
-    match detail.branches.iter().find(|x| x.title == title) {
+    match detail
+        .branches
+        .iter()
+        .find(|x| x.title.trim() == title.trim())
+    {
         Some(_) => {
             println!("failed");
             return Err("Please provide unique title for the branch.".to_string());
@@ -303,7 +311,11 @@ pub fn create_change(
             Ok(t) => t,
         },
     };
-    let branch = match detail.branches.iter_mut().find(|x| x.title == branch_title) {
+    let branch = match detail
+        .branches
+        .iter_mut()
+        .find(|x| x.title.trim() == branch_title.trim())
+    {
         None => {
             return Err("Failed to find target branch.".to_string());
         }
@@ -358,7 +370,11 @@ pub fn get_change_history(
             Ok(t) => t,
         },
     };
-    let branch = match detail.branches.iter().find(|x| x.title == branch_title) {
+    let branch = match detail
+        .branches
+        .iter()
+        .find(|x| x.title.trim() == branch_title.trim())
+    {
         None => {
             return Err("Failed to find target branch.".to_string());
         }

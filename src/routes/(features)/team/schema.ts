@@ -13,4 +13,9 @@ export const createChangeFormSchema = z.object({
 
 export type CreateChangeFormSchema = typeof createChangeFormSchema;
 
-export const pokepasteUrlSchema = z.string().url().startsWith("https://pokepast.es/")
+export const pokepasteUrlSchema = z.string().includes("pokepast.es/").transform(arg => {
+    if (arg.startsWith("https://")) {
+        return arg
+    }
+    return `https://${arg}`
+})
