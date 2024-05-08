@@ -33,7 +33,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import { InvalidBranchTitleError } from './errors';
-	import { createBranchFormSchema, createChangeFormSchema } from './schema';
+	import { createBranchFormSchema, createChangeFormSchema, pokepasteUrlSchema } from './schema';
 
 	const { data }: { data: PageData } = $props();
 	console.log(data);
@@ -84,12 +84,17 @@
 					if (!data.branchTitle) {
 						throw new InvalidBranchTitleError();
 					}
-					// const modifiedContext = $createChangeFormData.context.replaceAll("")
+					let context = $createChangeFormData.context;
+					const checkIsUrl = pokepasteUrlSchema.safeParse(context);
+					if (checkIsUrl.success) {
+						const content = await fetch(`${checkIsUrl.data}/json`);
+						context = ((await content.json()) as unknown as { paste: string }).paste;
+					}
 					const changeId = await createChange(
 						title,
 						data.branchTitle,
 						$createChangeFormData.message,
-						$createChangeFormData.context
+						context
 					);
 					let query = new URLSearchParams($page.url.searchParams.toString());
 					query.set('change', changeId);
