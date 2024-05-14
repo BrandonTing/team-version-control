@@ -3,11 +3,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
-	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { createBranch, createChange } from '@/bindings';
 	import UploadPokePasteButton from '@/components/pokePaste/uploadPokePasteButton.svelte';
 	import { Description, Root, Title } from '@/components/ui/alert';
+	import BreadcrumbItem from '@/components/ui/breadcrumb/breadcrumb-item.svelte';
 	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
@@ -19,16 +19,14 @@
 		FormLabel
 	} from '@/components/ui/form';
 	import { Input } from '@/components/ui/input';
-	import Label from '@/components/ui/label/label.svelte';
-	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
 	import Separator from '@/components/ui/separator/separator.svelte';
 	import { Textarea } from '@/components/ui/textarea';
-	import H3 from '@/components/ui/typography/h3.svelte';
 	import H4 from '@/components/ui/typography/h4.svelte';
 	import { InvokeTauriError } from '@/errors';
 	import { cn } from '@/utils';
 	import { Effect } from 'effect';
 	import { Ellipsis } from 'lucide-svelte';
+	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
@@ -132,93 +130,83 @@
 		<Breadcrumb.Item>
 			<Breadcrumb.Page>{title}</Breadcrumb.Page>
 		</Breadcrumb.Item>
+		<Breadcrumb.Separator />
+		<BreadcrumbItem>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger class="flex items-center gap-1">
+					{branchParam().label}
+					<ChevronDown class="w-4 h-4" />
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<Sheet.Root>
+						<Sheet.Trigger asChild let:builder>
+							<Button variant="ghost" class="w-full text-left" size="sm" builders={[builder]}
+								>New</Button
+							>
+						</Sheet.Trigger>
+						<Sheet.Content side="right">
+							<Sheet.Header>
+								<Sheet.Title>New Branch</Sheet.Title>
+								<Sheet.Description>
+									Want to test a new idea? Let's create a new branch to prevent confusions!
+								</Sheet.Description>
+							</Sheet.Header>
+							<form method="POST" use:enhance>
+								<FormField form={createBranchForm} name="title">
+									<FormControl let:attrs>
+										<FormLabel>Branch Title</FormLabel>
+										<Input {...attrs} bind:value={$formData.title} placeholder="title" />
+									</FormControl>
+									<FormDescription />
+									<FormFieldErrors />
+								</FormField>
+								<FormField form={createBranchForm} name="description">
+									<FormControl let:attrs>
+										<FormLabel>Description</FormLabel>
+										<Textarea
+											{...attrs}
+											bind:value={$formData.description}
+											placeholder="Describe the idea"
+										/>
+									</FormControl>
+									<FormDescription />
+									<FormFieldErrors />
+								</FormField>
+
+								<Sheet.Footer>
+									<Sheet.Close asChild let:builder>
+										<Button builders={[builder]} on:click={submit}>Create</Button>
+									</Sheet.Close>
+								</Sheet.Footer>
+							</form>
+						</Sheet.Content>
+					</Sheet.Root>
+					<Separator />
+					{#each data.team.branches as branch}
+						<DropdownMenu.Item
+							class="justify-center cursor-pointer"
+							on:click={() => {
+								if (branch.title === branchParam().label) {
+									return;
+								}
+								let query = new URLSearchParams($page.url.searchParams.toString());
+								query.set('branch', branch.title);
+								query.set('change', '');
+								goto(`?${query.toString()}`);
+							}}>{branch.title}</DropdownMenu.Item
+						>
+					{/each}
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		</BreadcrumbItem>
 	</Breadcrumb.List>
 </Breadcrumb.Root>
-
-<H3 content="Team Description"></H3>
-<p class="text-sm text-muted-foreground">{data.team.team.description}</p>
-
-<div>
-	<Label for="context">Branch</Label>
-	<Select.Root
-		portal={null}
-		selected={branchParam()}
-		onSelectedChange={(selected) => {
-			if (selected) {
-				let query = new URLSearchParams($page.url.searchParams.toString());
-				query.set('branch', selected.value);
-				query.set('change', '');
-				goto(`?${query.toString()}`);
-			}
-		}}
-		open={selectOpen}
-	>
-		<Select.Trigger class="w-[180px]" on:click={() => (selectOpen = true)}>
-			<Select.Value placeholder="Select a Branch" />
-		</Select.Trigger>
-		<Select.Content>
-			<ScrollArea class="max-h-40">
-				{#each data.team.branches as branch}
-					<Select.Item value={branch.title} label={branch.title}>{branch.title}</Select.Item>
-				{/each}
-			</ScrollArea>
-			<Separator />
-			<Sheet.Root
-				onOpenChange={(value) => {
-					if (!value) {
-						selectOpen = false;
-					}
-				}}
-			>
-				<Sheet.Trigger asChild let:builder>
-					<Button variant="ghost" class="w-full" size="sm" builders={[builder]}>New</Button>
-				</Sheet.Trigger>
-				<Sheet.Content side="right">
-					<Sheet.Header>
-						<Sheet.Title>New Branch</Sheet.Title>
-						<Sheet.Description>
-							Want to test a new idea? Let's create a new branch to prevent confusions!
-						</Sheet.Description>
-					</Sheet.Header>
-					<form method="POST" use:enhance>
-						<FormField form={createBranchForm} name="title">
-							<FormControl let:attrs>
-								<FormLabel>Branch Title</FormLabel>
-								<Input {...attrs} bind:value={$formData.title} placeholder="title" />
-							</FormControl>
-							<FormDescription />
-							<FormFieldErrors />
-						</FormField>
-						<FormField form={createBranchForm} name="description">
-							<FormControl let:attrs>
-								<FormLabel>Description</FormLabel>
-								<Textarea
-									{...attrs}
-									bind:value={$formData.description}
-									placeholder="Describe the idea"
-								/>
-							</FormControl>
-							<FormDescription />
-							<FormFieldErrors />
-						</FormField>
-
-						<Sheet.Footer>
-							<Sheet.Close asChild let:builder>
-								<Button builders={[builder]} on:click={submit}>Create</Button>
-							</Sheet.Close>
-						</Sheet.Footer>
-					</form>
-				</Sheet.Content>
-			</Sheet.Root>
-		</Select.Content>
-	</Select.Root>
-	{#if failMessage !== ''}
-		<Root variant="destructive" class="mt-2">
-			<Title>Error!</Title>
-			<Description>{failMessage}</Description>
-		</Root>
-	{/if}
-</div>
+{#if failMessage !== ''}
+	<Root variant="destructive" class="mt-2">
+		<Title>Error!</Title>
+		<Description>{failMessage}</Description>
+	</Root>
+{/if}
 
 {#if data.branch}
 	<H4 content="Branch Description"></H4>
@@ -235,7 +223,7 @@
 			<DropdownMenu.Trigger
 				id="more_options_dropdown"
 				class={cn(
-					buttonVariants({ variant: 'secondary', size: 'icon' }),
+					buttonVariants({ variant: 'ghost', size: 'icon' }),
 					'absolute right-0 -translate-y-1/2 top-1/2'
 				)}
 			>
