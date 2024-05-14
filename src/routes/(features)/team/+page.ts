@@ -4,7 +4,8 @@ import { error, redirect } from '@sveltejs/kit';
 import { Effect, Either } from "effect";
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { getPokemonsFromPaste } from "vgc_data_wrapper";
+import { getPokemonsFromPaste, Pokemon } from "vgc_data_wrapper";
+import { ParsePasteError } from './errors';
 import { createBranchFormSchema, createChangeFormSchema } from './schema';
 // since there's no dynamic data here, we can prerender
 // it so that it gets served as a static asset in production
@@ -52,9 +53,9 @@ export async function load({ url }) {
 				throw new RedirectError({ path: `/team?${query.toString()}` })
 			}
 			const change = branch?.history.find((val) => val.id === changeId);
+			let pokemons: Array<Pokemon> = []
 			if (change?.context) {
-				const pokemons = await getPokemonsFromPaste(change?.context)
-				console.log(pokemons)
+				pokemons = await getPokemonsFromPaste(change?.context)
 			}
 			return {
 				team,
@@ -66,12 +67,16 @@ export async function load({ url }) {
 				createChangeForm: await superValidate(zod(createChangeFormSchema, {
 					defaults: { context: change?.context ?? "", message: "" }
 				})),
+				pokemons
 			}
 
 		},
 		catch: (e) => {
 			if (e instanceof RedirectError) {
 				return e
+			}
+			if (e instanceof Error) {
+				return new ParsePasteError(e.message)
 			}
 			return new InvokeTauriError("getTeam", e as string)
 		}
@@ -84,6 +89,7 @@ export async function load({ url }) {
 		if (eitherData.left instanceof RedirectError) {
 			throw redirect(302, eitherData.left.path)
 		}
+		console.error(eitherData.left.message)
 		throw error(500, "failed to get team data")
 	}
 
