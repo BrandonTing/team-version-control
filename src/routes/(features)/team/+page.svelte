@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { createBranch, createChange } from '@/bindings';
 	import UploadPokePasteButton from '@/components/pokePaste/uploadPokePasteButton.svelte';
 	import { Description, Root, Title } from '@/components/ui/alert';
@@ -29,12 +30,10 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import type { PageData } from './$types';
 	import { InvalidBranchTitleError } from './errors';
 	import { createBranchFormSchema, createChangeFormSchema, pokepasteUrlSchema } from './schema';
 
-	const { data }: { data: PageData } = $props();
-	console.log(data);
+	const { data } = $props();
 	const { title } = data;
 
 	const branchParam = $derived(() => {
@@ -193,8 +192,19 @@
 								query.set('branch', branch.title);
 								query.set('change', '');
 								goto(`?${query.toString()}`);
-							}}>{branch.title}</DropdownMenu.Item
+							}}
 						>
+							<Tooltip.Root openDelay={200}>
+								<Tooltip.Trigger>{branch.title}</Tooltip.Trigger>
+								{#if branch.description}
+									<Tooltip.Content>
+										{#each branch.description.split('\n') as line}
+											<p>{line}</p>
+										{/each}
+									</Tooltip.Content>
+								{/if}
+							</Tooltip.Root>
+						</DropdownMenu.Item>
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
@@ -240,7 +250,7 @@
 					<Button
 						variant="ghost"
 						class="w-full"
-						href={`/team/history?team=${title}&branch=${branchParam().value}`}>View History</Button
+						href={`/team/history?title=${title}&branch=${branchParam().value}`}>View History</Button
 					>
 				</DropdownMenu.Item>
 				{#if data.change}

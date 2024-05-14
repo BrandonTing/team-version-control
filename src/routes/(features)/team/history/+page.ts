@@ -8,7 +8,7 @@ import { createBranchFromChangeFormSchema } from "./schema";
 
 export async function load({ url }) {
     const program = Effect.gen(function* () {
-        const teamTitle = url.searchParams.get('team');
+        const teamTitle = url.searchParams.get('title');
         const branchTitle = url.searchParams.get('branch');
         if (!teamTitle || !branchTitle) {
             return yield* new RedirectError({ path: "/" })
