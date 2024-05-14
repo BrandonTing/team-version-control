@@ -15,7 +15,7 @@
 
 	<footer class="flex justify-end p-4">
 		<div class="size-12">
-			<a href="https://github.com/BrandonTing/team-version-control">
+			<a href="https://github.com/BrandonTing/team-version-control" target="_blank">
 				<img src={github} alt="GitHub" />
 			</a>
 		</div>

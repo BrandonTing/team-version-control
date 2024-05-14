@@ -100,10 +100,6 @@
 								<Dialog.Title class="text-2xl text-center">
 									{change.message}
 								</Dialog.Title>
-								<!-- <Dialog.Description>
-									This action cannot be undone. This will permanently delete your account and remove
-									your data from our servers.
-								</Dialog.Description> -->
 							</Dialog.Header>
 							<ScrollArea class="flex-1">
 								<p class="whitespace-pre-line">{change.context}</p>

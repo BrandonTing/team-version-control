@@ -2,14 +2,17 @@
 	import { goto, invalidateAll, preloadData } from '$app/navigation';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Table from '$lib/components/ui/table';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { deleteTeam, resetStore } from '@/bindings';
 	import { Description, Root, Title } from '@/components/ui/alert';
 	import { buttonVariants } from '@/components/ui/button';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Input } from '@/components/ui/input';
 	import { InvokeTauriError, RedirectError } from '@/errors';
+	import { getEllipsisText } from '@/utils';
 	import { Console, Effect, Either } from 'effect';
 	import type { PageData } from './$types';
+
 	const { data }: { data: PageData } = $props();
 
 	let searchKw = $state('');
@@ -92,7 +95,16 @@
 									{team.title}
 								</Button>
 							</Table.Cell>
-							<Table.Cell>{team.description}</Table.Cell>
+							<Table.Cell>
+								<Tooltip.Root openDelay={200}>
+									<Tooltip.Trigger>{getEllipsisText(team.description, 30)}</Tooltip.Trigger>
+									<Tooltip.Content>
+										{#each team.description.split('\n') as line}
+											<p>{line}</p>
+										{/each}
+									</Tooltip.Content>
+								</Tooltip.Root>
+							</Table.Cell>
 							<Table.Cell>{new Date(team.created_at * 1000).toLocaleString()}</Table.Cell>
 							<Table.Cell>
 								<AlertDialog.Root>

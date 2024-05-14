@@ -4,7 +4,8 @@ import { error, redirect } from '@sveltejs/kit';
 import { Effect, Either } from "effect";
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { createBranchFormSchema, createChangeFormSchema } from './schema.js';
+import { getPokemonsFromPaste } from "vgc_data_wrapper";
+import { createBranchFormSchema, createChangeFormSchema } from './schema';
 // since there's no dynamic data here, we can prerender
 // it so that it gets served as a static asset in production
 export const prerender = true;
@@ -51,6 +52,10 @@ export async function load({ url }) {
 				throw new RedirectError({ path: `/team?${query.toString()}` })
 			}
 			const change = branch?.history.find((val) => val.id === changeId);
+			if (change?.context) {
+				const pokemons = await getPokemonsFromPaste(change?.context)
+				console.log(pokemons)
+			}
 			return {
 				team,
 				title,
