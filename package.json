@@ -48,6 +48,7 @@
     "tailwind-merge": "^2.2.2",
     "tailwind-variants": "^0.2.1",
     "tauri-plugin-store-api": "https://github.com/tauri-apps/tauri-plugin-store",
+    "vgc_data_wrapper": "^0.2.16",
     "zod": "^3.22.4"
   }
 }
