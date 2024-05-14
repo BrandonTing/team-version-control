@@ -60,3 +60,11 @@ export const flyAndScale = (
         easing: cubicOut
     };
 };
+
+export function getEllipsisText(originalText: string, maxLength: number) {
+    if (originalText.length < maxLength) {
+        return originalText
+    }
+    return originalText.slice(0, maxLength) + "..."
+}
+
