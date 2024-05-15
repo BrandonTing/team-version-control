@@ -32,6 +32,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { InvalidBranchTitleError } from './errors';
+	import PokemonCard from './pokemonCard.svelte';
 	import { createBranchFormSchema, createChangeFormSchema, pokepasteUrlSchema } from './schema';
 
 	const { data } = $props();
@@ -283,10 +284,12 @@
 				<Tabs.Trigger value={pokemon.name ?? ''}>{pokemon.name}</Tabs.Trigger>
 			{/each}
 			<Separator orientation="vertical" />
-			<Tabs.Trigger value="paste">Show Full Paste</Tabs.Trigger>
+			<Tabs.Trigger value="paste">Full Paste</Tabs.Trigger>
 		</Tabs.List>
 		{#each data.pokemons as pokemon}
-			<Tabs.Content value={pokemon.name ?? ''}>{pokemon.name}</Tabs.Content>
+			<Tabs.Content value={pokemon.name ?? ''}>
+				<PokemonCard {pokemon} />
+			</Tabs.Content>
 		{/each}
 		{#if pokemonTabValue === 'paste'}
 			<Tabs.Content value="paste" class="flex flex-col flex-1">
