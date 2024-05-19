@@ -68,3 +68,6 @@ export function getEllipsisText(originalText: string, maxLength: number) {
     return originalText.slice(0, maxLength) + "..."
 }
 
+export function getTypedObjKeys<T extends Record<string, unknown>>(obj: T) {
+    return Object.keys(obj) as Array<keyof T>
+}
