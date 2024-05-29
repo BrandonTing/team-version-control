@@ -1,10 +1,13 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
+	import * as Select from '$lib/components/ui/select';
+
 	import { Input } from '@/components/ui/input';
+	import Label from '@/components/ui/label/label.svelte';
+	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
 	import { getTypedObjKeys } from '@/utils';
-	import type { Pokemon } from 'vgc_data_wrapper';
+	import { types, type Pokemon } from 'vgc_data_wrapper';
 	const { pokemon }: { pokemon: Pokemon } = $props();
-	console.log(pokemon.moves);
 </script>
 
 <Card.Card class="px-4 py-2">
@@ -13,16 +16,43 @@
 			<img src={pokemon.sprite} alt="" />
 		</div>
 		<div class="flex flex-col gap-1 basis-40">
-			<div class="flex gap-1">
-				{#each pokemon.types as type}
-					<Input value={type} disabled></Input>
-				{/each}
+			<div>
+				<Label>Types</Label>
+				<div class="flex gap-1">
+					{#each pokemon.types as type}
+						<Input value={type} disabled></Input>
+					{/each}
+				</div>
 			</div>
-			<Input placeholder="Tera types" bind:value={pokemon.teraType}></Input>
-			<Input placeholder="Items" bind:value={pokemon.originalItem}></Input>
-			<Input placeholder="Ability" bind:value={pokemon.ability}></Input>
+			<div>
+				<Label>Tera Type</Label>
+				<!-- <Input placeholder="Tera types" bind:value={pokemon.teraType}></Input> -->
+				<Select.Root>
+					<Select.Trigger value={pokemon.teraType}>
+						<Select.Value placeholder="Tera Type" />
+					</Select.Trigger>
+
+					<Select.Content>
+						<ScrollArea class="h-48">
+							{#each types as type}
+								<Select.Item value={type}>{type}</Select.Item>
+							{/each}
+							<Select.Item value="Stellar">Stellar</Select.Item>
+						</ScrollArea>
+					</Select.Content>
+				</Select.Root>
+			</div>
+			<div>
+				<Label>Item</Label>
+				<Input placeholder="Items" bind:value={pokemon.originalItem}></Input>
+			</div>
+			<div>
+				<Label>Ability</Label>
+				<Input placeholder="Ability" bind:value={pokemon.ability}></Input>
+			</div>
 		</div>
 		<div class="flex flex-col gap-1 basis-40">
+			<Label>Move</Label>
 			{#each Array(4) as _, i}
 				<Input placeholder="Move" value={pokemon.moves[i]} />
 			{/each}
@@ -33,7 +63,13 @@
 			<span>Stat</span>
 			{#each getTypedObjKeys(pokemon.baseStat) as statKey}
 				<p class="py-2">{pokemon.baseStat[statKey]}</p>
-				<Input placeholder="HP" bind:value={pokemon.effortValues[statKey]} class="col-span-2"
+				<Input
+					type="number"
+					step={4}
+					max={252}
+					min={0}
+					bind:value={pokemon.effortValues[statKey]}
+					class="col-span-2"
 				></Input>
 				<p class="py-2 font-semibold">{pokemon.getStat(statKey)}</p>
 			{/each}
