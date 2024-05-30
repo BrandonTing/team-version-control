@@ -47,6 +47,7 @@
 			</div>
 			<div>
 				<Label>Item</Label>
+				<!-- FIXME performance issue -->
 				<!-- <Input placeholder="Items" bind:value={pokemon.originalItem}></Input> -->
 				<InfoComboBox
 					options={Object.values(items).map((item) => item.name)}
