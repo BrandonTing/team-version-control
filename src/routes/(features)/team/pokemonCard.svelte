@@ -7,6 +7,10 @@
 	import ScrollArea from '@/components/ui/scroll-area/scroll-area.svelte';
 	import { getTypedObjKeys } from '@/utils';
 	import { types, type Pokemon } from 'vgc_data_wrapper';
+	import abilities from 'vgc_data_wrapper/sd/abilities.json';
+	import items from 'vgc_data_wrapper/sd/items.json';
+	import moves from 'vgc_data_wrapper/sd/moves.json';
+	import InfoComboBox from './infoComboBox.svelte';
 	const { pokemon }: { pokemon: Pokemon } = $props();
 </script>
 
@@ -26,9 +30,8 @@
 			</div>
 			<div>
 				<Label>Tera Type</Label>
-				<!-- <Input placeholder="Tera types" bind:value={pokemon.teraType}></Input> -->
 				<Select.Root>
-					<Select.Trigger value={pokemon.teraType}>
+					<Select.Trigger>
 						<Select.Value placeholder="Tera Type" />
 					</Select.Trigger>
 
@@ -44,17 +47,29 @@
 			</div>
 			<div>
 				<Label>Item</Label>
-				<Input placeholder="Items" bind:value={pokemon.originalItem}></Input>
+				<!-- <Input placeholder="Items" bind:value={pokemon.originalItem}></Input> -->
+				<InfoComboBox
+					options={Object.values(items).map((item) => item.name)}
+					defaultValue={pokemon.originalItem}
+				/>
 			</div>
 			<div>
 				<Label>Ability</Label>
-				<Input placeholder="Ability" bind:value={pokemon.ability}></Input>
+				<!-- <Input placeholder="Ability" bind:value={pokemon.ability}></Input> -->
+				<InfoComboBox
+					options={Object.values(abilities).map((item) => item.name)}
+					defaultValue={pokemon.ability}
+				/>
 			</div>
 		</div>
 		<div class="flex flex-col gap-1 basis-40">
 			<Label>Move</Label>
 			{#each Array(4) as _, i}
-				<Input placeholder="Move" value={pokemon.moves[i]} />
+				<!-- <Input placeholder="Move" value={pokemon.moves[i]} /> -->
+				<InfoComboBox
+					options={Object.values(moves).map((move) => move.name)}
+					defaultValue={pokemon.moves[i]}
+				/>
 			{/each}
 		</div>
 		<div class="grid grid-cols-4 gap-1">
