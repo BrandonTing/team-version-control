@@ -2,27 +2,15 @@
 	import { flyAndScale } from '@/utils';
 	import { Combobox } from 'bits-ui';
 	import { Check, ChevronsUpDown } from 'lucide-svelte';
-	import { tick } from 'svelte';
 
-	const { options, defaultValue }: { options: Array<string>; defaultValue?: string } = $props();
-	let open = $state(false);
-	let inputValue = $state(defaultValue?.trim() ?? '');
+	let { options, inputValue = $bindable('') }: { options: Array<string>; inputValue?: string } =
+		$props();
 	let touchedInput = $state(false);
 	const filteredOptions = $derived(
 		options
 			.filter((option) => option.toLowerCase().includes(inputValue.toLowerCase()))
 			.map((option) => ({ value: option }))
 	);
-	const selectedValue = $derived(
-		options.find((option) => option.toLowerCase() === inputValue.toLowerCase()) ??
-			'Select a option...'
-	);
-	function closeAndFocusTrigger(triggerId: string) {
-		open = false;
-		tick().then(() => {
-			document.getElementById(triggerId)?.focus();
-		});
-	}
 </script>
 
 <Combobox.Root items={filteredOptions} bind:inputValue bind:touchedInput>

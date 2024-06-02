@@ -47,29 +47,25 @@
 			</div>
 			<div>
 				<Label>Item</Label>
-				<!-- FIXME performance issue -->
-				<!-- <Input placeholder="Items" bind:value={pokemon.originalItem}></Input> -->
 				<InfoComboBox
 					options={Object.values(items).map((item) => item.name)}
-					defaultValue={pokemon.originalItem}
+					inputValue={pokemon.originalItem}
 				/>
 			</div>
 			<div>
 				<Label>Ability</Label>
-				<!-- <Input placeholder="Ability" bind:value={pokemon.ability}></Input> -->
 				<InfoComboBox
 					options={Object.values(abilities).map((item) => item.name)}
-					defaultValue={pokemon.ability}
+					inputValue={pokemon.ability}
 				/>
 			</div>
 		</div>
 		<div class="flex flex-col gap-1 basis-40">
 			<Label>Move</Label>
 			{#each Array(4) as _, i}
-				<!-- <Input placeholder="Move" value={pokemon.moves[i]} /> -->
 				<InfoComboBox
 					options={Object.values(moves).map((move) => move.name)}
-					defaultValue={pokemon.moves[i]}
+					inputValue={pokemon.moves[i]}
 				/>
 			{/each}
 		</div>
