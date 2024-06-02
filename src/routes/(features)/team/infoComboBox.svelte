@@ -1,18 +1,21 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Command from '$lib/components/ui/command/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { cn } from '$lib/utils.js';
-	import { ScrollArea } from '@/components/ui/scroll-area';
-	import Check from 'lucide-svelte/icons/check';
-	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
+	import { flyAndScale } from '@/utils';
+	import { Combobox } from 'bits-ui';
+	import { Check, ChevronsUpDown } from 'lucide-svelte';
 	import { tick } from 'svelte';
 
 	const { options, defaultValue }: { options: Array<string>; defaultValue?: string } = $props();
 	let open = $state(false);
-	let value = $state(defaultValue?.trim() ?? '');
+	let inputValue = $state(defaultValue?.trim() ?? '');
+	let touchedInput = $state(false);
+	const filteredOptions = $derived(
+		options
+			.filter((option) => option.toLowerCase().includes(inputValue.toLowerCase()))
+			.map((option) => ({ value: option }))
+	);
 	const selectedValue = $derived(
-		options.find((option) => option.toLowerCase() === value.toLowerCase()) ?? 'Select a option...'
+		options.find((option) => option.toLowerCase() === inputValue.toLowerCase()) ??
+			'Select a option...'
 	);
 	function closeAndFocusTrigger(triggerId: string) {
 		open = false;
@@ -22,39 +25,35 @@
 	}
 </script>
 
-<Popover.Root bind:open let:ids>
-	<Popover.Trigger asChild let:builder>
-		<Button
-			builders={[builder]}
-			variant="outline"
-			role="combobox"
-			aria-expanded={open}
-			class="w-[200px] justify-between"
-		>
-			{selectedValue}
-			<ChevronsUpDown class="w-4 h-4 ml-2 opacity-50 shrink-0" />
-		</Button>
-	</Popover.Trigger>
-	<Popover.Content class="w-[200px] p-0">
-		<Command.Root>
-			<Command.Input placeholder="Search..." />
-			<Command.Empty>No option found.</Command.Empty>
-			<Command.Group>
-				<ScrollArea class="h-48">
-					{#each options as option}
-						<Command.Item
-							value={option}
-							onSelect={(currentValue) => {
-								value = currentValue;
-								closeAndFocusTrigger(ids.trigger);
-							}}
-						>
-							<Check class={cn('mr-2 h-4 w-4', value !== option && 'text-transparent')} />
-							{option}
-						</Command.Item>
-					{/each}
-				</ScrollArea>
-			</Command.Group>
-		</Command.Root>
-	</Popover.Content>
-</Popover.Root>
+<Combobox.Root items={filteredOptions} bind:inputValue bind:touchedInput>
+	<div class="relative">
+		<Combobox.Input
+			class="flex w-full h-10 px-3 py-2 text-sm border rounded-md border-input bg-background ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			placeholder="Search a fruit"
+			aria-label="Search a fruit"
+		/>
+		<ChevronsUpDown class="absolute -translate-y-1/2 end-3 top-1/2 size-4 text-muted-foreground" />
+	</div>
+
+	<Combobox.Content
+		class="w-full px-1 py-1 border outline-none rounded-xl border-muted bg-background shadow-popover"
+		transition={flyAndScale}
+		sideOffset={8}
+	>
+		{#each filteredOptions as option (option.value)}
+			<Combobox.Item
+				class="flex  w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm capitalize outline-none transition-all duration-75 data-[highlighted]:bg-muted"
+				value={option.value}
+				label={option.value}
+			>
+				{option.value}
+				<Combobox.ItemIndicator class="ml-auto" asChild={false}>
+					<Check />
+				</Combobox.ItemIndicator>
+			</Combobox.Item>
+		{:else}
+			<span class="block px-5 py-2 text-sm text-muted-foreground"> No results found </span>
+		{/each}
+	</Combobox.Content>
+	<Combobox.HiddenInput name="favoriteFruit" />
+</Combobox.Root>
