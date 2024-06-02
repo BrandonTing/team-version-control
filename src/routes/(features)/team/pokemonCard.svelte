@@ -31,7 +31,12 @@
 			</div>
 			<div>
 				<Label>Tera Type</Label>
-				<Select.Root bind:selected={teraType}>
+				<Select.Root
+					bind:selected={teraType}
+					onSelectedChange={(v) => {
+						if (v?.value) pokemon.teraType = v.value;
+					}}
+				>
 					<Select.Trigger>
 						<Select.Value placeholder="Tera Type" />
 					</Select.Trigger>

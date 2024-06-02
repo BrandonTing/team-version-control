@@ -31,6 +31,7 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { getPasteFromPokemons } from 'vgc_data_wrapper';
 	import { InvalidBranchTitleError } from './errors';
 	import PokemonCard from './pokemonCard.svelte';
 	import { createBranchFormSchema, createChangeFormSchema, pokepasteUrlSchema } from './schema';
@@ -46,7 +47,6 @@
 		};
 	});
 	let failMessage = $state('');
-	let selectOpen = $state(false);
 	const createBranchForm = superForm(data.createBranchForm, {
 		validators: zodClient(createBranchFormSchema),
 		SPA: true,
@@ -117,8 +117,14 @@
 	let canSubmit = $derived(
 		$createChangeFormData.context !== data.change?.context && !!$createChangeFormData.message
 	);
-	// TODO update form data when show sheet
 	let pokemonTabValue = $state('');
+	function updateContext() {
+		const paste = getPasteFromPokemons(data.pokemons);
+		createChangeFormData.set({
+			context: paste,
+			message: $createChangeFormData.message
+		});
+	}
 </script>
 
 <Breadcrumb.Root>
@@ -269,6 +275,9 @@
 				return;
 			}
 			pokemonTabValue = v;
+			if (v === 'paste') {
+				updateContext();
+			}
 		}}
 		value={data.pokemons[0]?.name ?? ''}
 		class="flex flex-col flex-1 w-full"
@@ -287,15 +296,15 @@
 		{/each}
 		{#if pokemonTabValue === 'paste'}
 			<Tabs.Content value="paste" class="flex flex-col flex-1">
-				<Textarea class="flex-1" disabled value={data.change?.context ?? ''} />
+				<Textarea class="flex-1" disabled value={$createChangeFormData.context ?? ''} />
 			</Tabs.Content>
 		{/if}
 	</Tabs.Root>
 
 	<Sheet.Root
-		onOpenChange={(value) => {
-			if (!value) {
-				selectOpen = false;
+		onOpenChange={(isOpen) => {
+			if (isOpen) {
+				updateContext();
 			}
 		}}
 	>
@@ -303,7 +312,7 @@
 			<Button builders={[builder]}>New Change</Button>
 		</Sheet.Trigger>
 
-		<Sheet.Content side="bottom" class="flex flex-col">
+		<Sheet.Content side="right" class="flex flex-col">
 			<Sheet.Header>
 				<Sheet.Title>New Change</Sheet.Title>
 				<Sheet.Description>Save your idea with a clear message</Sheet.Description>
@@ -317,6 +326,9 @@
 							placeholder="Submit First Version!"
 							class="flex-1 "
 							bind:value={$createChangeFormData.context}
+							on:focus={(e) => {
+								(e.target as HTMLTextAreaElement)?.setSelectionRange(0, 0);
+							}}
 						/>
 						<FormDescription>Update the paste</FormDescription>
 					</FormControl>

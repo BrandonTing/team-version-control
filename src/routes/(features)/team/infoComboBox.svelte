@@ -11,7 +11,6 @@
 			.filter((option) => option.toLowerCase().includes(inputValue.toLowerCase()))
 			.map((option) => ({ value: option }))
 	);
-	$effect(() => {});
 </script>
 
 <Combobox.Root items={filteredOptions} bind:inputValue bind:touchedInput>

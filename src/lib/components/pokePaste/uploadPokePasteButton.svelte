@@ -25,7 +25,6 @@
 				await open(url);
 			},
 			catch: (e) => {
-				console.log(e);
 				return new InvokeTauriError('upload', e as string);
 			}
 		}).pipe(Effect.runPromise);

@@ -10,7 +10,7 @@
 	import { Input } from '@/components/ui/input';
 	import { InvokeTauriError, RedirectError } from '@/errors';
 	import { getEllipsisText } from '@/utils';
-	import { Console, Effect, Either } from 'effect';
+	import { Effect, Either } from 'effect';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
@@ -37,7 +37,6 @@
 			});
 		}).pipe(
 			Effect.catchTag('InvokeTauriError', (e) => {
-				Effect.runSync(Console.log(e.message));
 				return Effect.succeed(undefined);
 			}),
 			Effect.either,
