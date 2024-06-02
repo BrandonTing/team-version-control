@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
+	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { createBranch, createChange } from '@/bindings';
 	import UploadPokePasteButton from '@/components/pokePaste/uploadPokePasteButton.svelte';
@@ -30,7 +31,9 @@
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { getPasteFromPokemons } from 'vgc_data_wrapper';
 	import { InvalidBranchTitleError } from './errors';
+	import PokemonCard from './pokemonCard.svelte';
 	import { createBranchFormSchema, createChangeFormSchema, pokepasteUrlSchema } from './schema';
 
 	const { data } = $props();
@@ -44,7 +47,6 @@
 		};
 	});
 	let failMessage = $state('');
-	let selectOpen = $state(false);
 	const createBranchForm = superForm(data.createBranchForm, {
 		validators: zodClient(createBranchFormSchema),
 		SPA: true,
@@ -67,10 +69,6 @@
 		invalidateAll: true
 	});
 	const { form: formData, enhance, submit } = createBranchForm;
-	let edited = $state(false);
-	function checkEdited(e: Event) {
-		edited = (e.target as HTMLTextAreaElement).value !== (data.change?.context ?? '');
-	}
 
 	const createChangeForm = superForm(data.createChangeForm, {
 		validators: zodClient(createChangeFormSchema),
@@ -116,8 +114,17 @@
 		invalidateAll: false
 	});
 	const { form: createChangeFormData } = createChangeForm;
-
-	let createChangeSheetOpen = $state(false);
+	let canSubmit = $derived(
+		$createChangeFormData.context !== data.change?.context && !!$createChangeFormData.message
+	);
+	let pokemonTabValue = $state('');
+	function updateContext() {
+		const paste = getPasteFromPokemons(data.pokemons);
+		createChangeFormData.set({
+			context: paste,
+			message: $createChangeFormData.message
+		});
+	}
 </script>
 
 <Breadcrumb.Root>
@@ -211,6 +218,7 @@
 		</BreadcrumbItem>
 	</Breadcrumb.List>
 </Breadcrumb.Root>
+
 {#if failMessage !== ''}
 	<Root variant="destructive" class="mt-2">
 		<Title>Error!</Title>
@@ -242,11 +250,6 @@
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content align="end">
 				<DropdownMenu.Item>
-					<Button variant="ghost" class="w-full" on:click={() => (createChangeSheetOpen = true)}
-						>New Change</Button
-					>
-				</DropdownMenu.Item>
-				<DropdownMenu.Item>
 					<Button
 						variant="ghost"
 						class="w-full"
@@ -266,15 +269,49 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</div>
-	<Textarea class="flex-1" disabled value={data.change?.context ?? ''} />
+	<Tabs.Root
+		onValueChange={(v) => {
+			if (!v) {
+				return;
+			}
+			pokemonTabValue = v;
+			if (v === 'paste') {
+				updateContext();
+			}
+		}}
+		value={data.pokemons[0]?.name ?? ''}
+		class="flex flex-col flex-1 w-full"
+	>
+		<Tabs.List>
+			{#each data.pokemons as pokemon}
+				<Tabs.Trigger value={pokemon.name ?? ''}>{pokemon.name}</Tabs.Trigger>
+			{/each}
+			<Separator orientation="vertical" />
+			<Tabs.Trigger value="paste">Full Paste</Tabs.Trigger>
+		</Tabs.List>
+		{#each data.pokemons as pokemon}
+			<Tabs.Content value={pokemon.name ?? ''}>
+				<PokemonCard {pokemon} />
+			</Tabs.Content>
+		{/each}
+		{#if pokemonTabValue === 'paste'}
+			<Tabs.Content value="paste" class="flex flex-col flex-1">
+				<Textarea class="flex-1" disabled value={$createChangeFormData.context ?? ''} />
+			</Tabs.Content>
+		{/if}
+	</Tabs.Root>
+
 	<Sheet.Root
-		bind:open={createChangeSheetOpen}
-		onOpenChange={(value) => {
-			if (!value) {
-				selectOpen = false;
+		onOpenChange={(isOpen) => {
+			if (isOpen) {
+				updateContext();
 			}
 		}}
 	>
+		<Sheet.Trigger asChild let:builder>
+			<Button builders={[builder]}>New Change</Button>
+		</Sheet.Trigger>
+
 		<Sheet.Content side="right" class="flex flex-col">
 			<Sheet.Header>
 				<Sheet.Title>New Change</Sheet.Title>
@@ -289,7 +326,9 @@
 							placeholder="Submit First Version!"
 							class="flex-1 "
 							bind:value={$createChangeFormData.context}
-							on:change={checkEdited}
+							on:focus={(e) => {
+								(e.target as HTMLTextAreaElement)?.setSelectionRange(0, 0);
+							}}
 						/>
 						<FormDescription>Update the paste</FormDescription>
 					</FormControl>
@@ -310,7 +349,7 @@
 
 				<Sheet.Footer>
 					<Sheet.Close asChild let:builder>
-						<Button disabled={!edited} builders={[builder]} on:click={createChangeForm.submit}
+						<Button disabled={!canSubmit} builders={[builder]} on:click={createChangeForm.submit}
 							>Create</Button
 						>
 					</Sheet.Close>

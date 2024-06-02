@@ -28,7 +28,6 @@ export async function load({ url }) {
         if (eitherData.left instanceof RedirectError) {
             throw redirect(302, eitherData.left.path)
         }
-        console.error(eitherData.left.message)
         throw error(500, "failed to get change history")
     }
     return {

@@ -6,7 +6,6 @@ import { error } from '@sveltejs/kit';
 export const prerender = true;
 
 export async function load() {
-	console.log('re load')
 	try {
 		return { teamsRequest: getTeams() }
 	} catch (e) {
