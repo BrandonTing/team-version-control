@@ -12,6 +12,7 @@
 	import moves from 'vgc_data_wrapper/sd/moves.json';
 	import InfoComboBox from './infoComboBox.svelte';
 	const { pokemon }: { pokemon: Pokemon } = $props();
+	let teraType = $state({ value: pokemon.teraType, label: pokemon.teraType });
 </script>
 
 <Card.Card class="px-4 py-2">
@@ -29,9 +30,8 @@
 				</div>
 			</div>
 			<div>
-				<!-- TODO default value -->
 				<Label>Tera Type</Label>
-				<Select.Root>
+				<Select.Root bind:selected={teraType}>
 					<Select.Trigger>
 						<Select.Value placeholder="Tera Type" />
 					</Select.Trigger>

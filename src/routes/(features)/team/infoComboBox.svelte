@@ -11,17 +11,15 @@
 			.filter((option) => option.toLowerCase().includes(inputValue.toLowerCase()))
 			.map((option) => ({ value: option }))
 	);
-	$effect(() => {
-		
-	})
+	$effect(() => {});
 </script>
 
 <Combobox.Root items={filteredOptions} bind:inputValue bind:touchedInput>
 	<div class="relative">
 		<Combobox.Input
 			class="flex w-full h-10 px-3 py-2 text-sm border rounded-md border-input bg-background ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-			placeholder="Search a fruit"
-			aria-label="Search a fruit"
+			placeholder="Search an option"
+			aria-label="Search an option"
 		/>
 		<ChevronsUpDown class="absolute -translate-y-1/2 end-3 top-1/2 size-4 text-muted-foreground" />
 	</div>
