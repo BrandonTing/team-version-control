@@ -29,6 +29,7 @@
 				</div>
 			</div>
 			<div>
+				<!-- TODO default value -->
 				<Label>Tera Type</Label>
 				<Select.Root>
 					<Select.Trigger>

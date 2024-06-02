@@ -69,10 +69,6 @@
 		invalidateAll: true
 	});
 	const { form: formData, enhance, submit } = createBranchForm;
-	let edited = $state(false);
-	function checkEdited(e: Event) {
-		edited = (e.target as HTMLTextAreaElement).value !== (data.change?.context ?? '');
-	}
 
 	const createChangeForm = superForm(data.createChangeForm, {
 		validators: zodClient(createChangeFormSchema),
@@ -118,8 +114,10 @@
 		invalidateAll: false
 	});
 	const { form: createChangeFormData } = createChangeForm;
-
-	let createChangeSheetOpen = $state(false);
+	let canSubmit = $derived(
+		$createChangeFormData.context !== data.change?.context && !!$createChangeFormData.message
+	);
+	// TODO update form data when show sheet
 	let pokemonTabValue = $state('');
 </script>
 
@@ -214,6 +212,7 @@
 		</BreadcrumbItem>
 	</Breadcrumb.List>
 </Breadcrumb.Root>
+
 {#if failMessage !== ''}
 	<Root variant="destructive" class="mt-2">
 		<Title>Error!</Title>
@@ -244,11 +243,6 @@
 				<span class="sr-only">More</span>
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content align="end">
-				<DropdownMenu.Item>
-					<Button variant="ghost" class="w-full" on:click={() => (createChangeSheetOpen = true)}
-						>New Change</Button
-					>
-				</DropdownMenu.Item>
 				<DropdownMenu.Item>
 					<Button
 						variant="ghost"
@@ -299,14 +293,17 @@
 	</Tabs.Root>
 
 	<Sheet.Root
-		bind:open={createChangeSheetOpen}
 		onOpenChange={(value) => {
 			if (!value) {
 				selectOpen = false;
 			}
 		}}
 	>
-		<Sheet.Content side="right" class="flex flex-col">
+		<Sheet.Trigger asChild let:builder>
+			<Button builders={[builder]}>New Change</Button>
+		</Sheet.Trigger>
+
+		<Sheet.Content side="bottom" class="flex flex-col">
 			<Sheet.Header>
 				<Sheet.Title>New Change</Sheet.Title>
 				<Sheet.Description>Save your idea with a clear message</Sheet.Description>
@@ -320,7 +317,6 @@
 							placeholder="Submit First Version!"
 							class="flex-1 "
 							bind:value={$createChangeFormData.context}
-							on:change={checkEdited}
 						/>
 						<FormDescription>Update the paste</FormDescription>
 					</FormControl>
@@ -341,7 +337,7 @@
 
 				<Sheet.Footer>
 					<Sheet.Close asChild let:builder>
-						<Button disabled={!edited} builders={[builder]} on:click={createChangeForm.submit}
+						<Button disabled={!canSubmit} builders={[builder]} on:click={createChangeForm.submit}
 							>Create</Button
 						>
 					</Sheet.Close>
