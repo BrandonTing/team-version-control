@@ -13,6 +13,7 @@
 	import InfoComboBox from './infoComboBox.svelte';
 	const { pokemon }: { pokemon: Pokemon } = $props();
 	let teraType = $state({ value: pokemon.teraType, label: pokemon.teraType });
+	let stats = $state(pokemon.getStats());
 </script>
 
 <Card.Card class="px-4 py-2">
@@ -88,8 +89,11 @@
 					min={0}
 					bind:value={pokemon.effortValues[statKey]}
 					class="col-span-2"
+					on:change={() => {
+						stats[statKey] = pokemon.getStat(statKey);
+					}}
 				></Input>
-				<p class="py-2 font-semibold">{pokemon.getStat(statKey)}</p>
+				<p class="py-2 font-semibold">{stats[statKey]}</p>
 			{/each}
 		</div>
 	</Card.Content>
