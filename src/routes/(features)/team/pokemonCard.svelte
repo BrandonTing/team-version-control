@@ -13,6 +13,12 @@
 	import InfoComboBox from './infoComboBox.svelte';
 	const { pokemon }: { pokemon: Pokemon } = $props();
 	let teraType = $state({ value: pokemon.teraType, label: pokemon.teraType });
+	$effect(() => {
+		teraType = {
+			value: pokemon.teraType,
+			label: pokemon.teraType
+		};
+	});
 	let stats = $state(pokemon.getStats());
 </script>
 
